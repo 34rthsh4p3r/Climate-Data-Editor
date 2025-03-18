@@ -39,7 +39,6 @@ if uploaded_file is not None:
 
             # Correct the column names after multi-level aggregation
             monthly_avg.columns = ['Month', 'Mean_Rain', 'trash', 'Mean_Tmin', 'Absolute_Monthly_Tmin','Mean_Tmax']
-            monthly_avg = monthly_avg.drop('trash', axis=1) # Drop trash
 
             Absolute_Tmin = df['Tmin'].min()
             Absolute_Tmax = df['Tmax'].max()
@@ -82,7 +81,6 @@ if uploaded_file is not None:
 
             # Display the code and allow copying
             st.code(output_buffer.getvalue(), language="r")
-
 
             #Close Buffer
             output_buffer.close()
