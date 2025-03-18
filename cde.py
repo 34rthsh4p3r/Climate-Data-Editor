@@ -1,236 +1,166 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import io
-import openpyxl  # Make sure to install: pip install openpyxl
+import numpy as np
 
-def plot_walter_lieth(df, station_name="", elevation=None, period_of_observation=""):
-    """
-    Generates a Walter-Lieth climate diagram from a DataFrame.
+# Set page configuration
+st.set_page_config(page_title="Climate Data Editor", layout="wide")
 
-    Args:
-        df: DataFrame with 'Month', 'Avg Rain' (precipitation), and
-            'Avg Max T' (temperature) columns.  'Month' should be
-            integers from 1 to 12.
-        station_name: (Optional) Name of the weather station.
-        elevation: (Optional) Elevation of the station in meters.
-        period_of_observation: (Optional) String describing the observation period.
+# --- Sidebar --- (Not used in this specific layout, but good practice to include)
+# st.sidebar.header("Settings")
+# ... any sidebar options if needed ...
 
-    Returns:
-        A matplotlib Figure object.
-    """
+# --- Main Page ---
+st.title("Walter-Lieth Diagram")
 
-    # --- Data Validation (Essential) ---
-    required_columns = ['Month', 'Avg Rain', 'Avg Max T']
-    if not all(col in df.columns for col in required_columns):
-        raise ValueError(f"Input DataFrame must contain columns: {', '.join(required_columns)}")
-    if df.isnull().values.any():
-        raise ValueError("Missing values found. Clean the data before processing.")
-    if not df['Month'].between(1, 12).all():
-        raise ValueError("The 'Month' column must contain integer values between 1 and 12.")
-    if not pd.api.types.is_numeric_dtype(df['Avg Rain']):
-        raise TypeError("The 'Avg Rain' column must contain numeric values.")
-    if not pd.api.types.is_numeric_dtype(df['Avg Max T']):
-        raise TypeError("The 'Avg Max T' column must contain numeric values.")
-
-    # Sort by month (important for plotting)
-    df = df.sort_values('Month')
-
-    # --- Plotting ---
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-
-    # Temperature (left y-axis)
-    color = 'tab:red'
-    ax1.set_xlabel('Month')
-    ax1.set_ylabel('Temperature (°C)', color=color)
-    ax1.plot(df['Month'], df['Avg Max T'], color=color, label='Avg Max T')
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax1.set_xticks(df['Month'])  # Ensure all months are displayed
-    ax1.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+# --- Station Information Input ---
+st.header("Station Information (Optional)")
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    station_number = st.text_input("Number", "")
+with col2:
+    station_location = st.text_input("Location", "")
+with col3:
+    station_coordinates = st.text_input("Coordinates", "")
+with col4:
+    station_elevation = st.text_input("Elevation", "")
 
 
-    # Precipitation (right y-axis) - create a twin axis
-    ax2 = ax1.twinx()
-    color = 'tab:blue'
-    ax2.set_ylabel('Precipitation (mm)', color=color)
-    # Use bars, and adjust for the scaling change > 100mm
-    for i in range(len(df)):
-        if df['Avg Rain'].iloc[i] > 100:
-            # Scale change:  Assume 10:200 above 100mm
-            # Draw *two* bars: one up to 100mm, and another scaled differently above it.
-            ax2.bar(df['Month'].iloc[i], 100, color=color, alpha=0.5, width=0.4)
-            ax2.bar(df['Month'].iloc[i], (df['Avg Rain'].iloc[i] - 100) , bottom=100, color=color, alpha=0.5, width=0.4, label='_nolegend_' if i!=0 else 'Avg Rain') #prevent multiple legend entries
-        else:
-            ax2.bar(df['Month'].iloc[i], df['Avg Rain'].iloc[i], color=color, alpha=0.5, width=0.4,  label='_nolegend_' if i!=0 else 'Avg Rain')
-    ax2.tick_params(axis='y', labelcolor=color)
+# --- File Upload and Data Validation ---
+st.header("Upload Climate Data")
+st.write("Excel data should have these specific columns: Year, Month, Rain, Tavg, Tmin, Tmax. Only full years with no missing data should be added.")
 
-
-    # --- Dynamic Axis Limits ---
-    # Calculate max values for scaling, accounting for the precipitation scale change
-    max_temp = df['Avg Max T'].max()
-    max_precip = df['Avg Rain'].max()
-
-    # Set y-axis limits based on the adjusted scaling.
-    ax1_ymax = max(max_temp * 1.1, 50)  # Ensure at least up to 50°C for readability
-    ax2_ymax = max(max_precip * 1.1, 100) # Minimum up to 100
-     # If precip exceeds 100, adjust further:
-    if max_precip > 100:
-        ax1_ymax = max(ax1_ymax, (max_precip-100)/10 + 50)
-        ax2_ymax = max(ax2_ymax, max_precip * 1.1)
-
-    ax1.set_ylim(0, ax1_ymax)
-    ax2.set_ylim(0, ax2_ymax)
-
-    # Add shaded areas (Humid and Arid periods)
-    for i in range(len(df)):
-        # Adjust comparison for scaled precipitation
-        precip_scaled = min(df['Avg Rain'].iloc[i], 100) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10) #Corrected scaling
-
-        if precip_scaled > df['Avg Max T'].iloc[i] * 2:
-            ax2.fill_between(
-                [df['Month'].iloc[i] - 0.4, df['Month'].iloc[i] + 0.4],
-                [min(100, df['Avg Max T'].iloc[i] * 2) + max(0,(df['Avg Max T'].iloc[i] * 2 - 100)/10), min(100, df['Avg Max T'].iloc[i] * 2) + max(0,(df['Avg Max T'].iloc[i] * 2 - 100)/10)],  # Adjusted for scaling!
-                [min(100,df['Avg Rain'].iloc[i]) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10), min(100,df['Avg Rain'].iloc[i]) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10)],
-                color="blue",
-                alpha=0.2
-            )
-        if precip_scaled < df['Avg Max T'].iloc[i] * 2:
-            ax1.fill_between(
-                [df['Month'].iloc[i] - 0.4, df['Month'].iloc[i] + 0.4],
-                [min(50, df['Avg Rain'].iloc[i]/2) + max(0,(df['Avg Rain'].iloc[i]/2 - 50)), min(50, df['Avg Rain'].iloc[i]/2) + max(0,(df['Avg Rain'].iloc[i]/2 - 50))],
-                [df['Avg Max T'].iloc[i], df['Avg Max T'].iloc[i]],
-                color="red",
-                alpha=0.2
-            )
-
-    # Add title and legend
-    title = "Walter-Lieth Climate Diagram"
-    if station_name:
-        title += f" for {station_name}"
-    if elevation is not None:
-        title += f" ({elevation} m)"
-    plt.title(title)
-
-    if period_of_observation:
-        plt.text(0.5, 1.05, period_of_observation, transform=ax1.transAxes, ha='center', fontsize=10)
-
-     # Add overall averages to top right
-    avg_temp = df['Avg Max T'].mean()
-    avg_precip = df['Avg Rain'].mean()
-
-    plt.text(0.95, 0.95, f"Avg. Temp: {avg_temp:.1f}°C\nAvg. Precip: {avg_precip:.1f} mm",
-            transform=ax1.transAxes, ha='right', va='top', bbox=dict(facecolor='white', alpha=0.8))
-
-
-    fig.tight_layout()  # Adjust layout to prevent labels from overlapping
-    # Place legend outside the plot area
-    handles1, labels1 = ax1.get_legend_handles_labels()
-    handles2, labels2 = ax2.get_legend_handles_labels()
-    fig.legend(handles1 + handles2, labels1 + labels2, loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2)
-
-    return fig
-
-
-
-def process_climate_data(df):
-    # --- Validation ---
-    required_columns = ['Year', 'Month', 'Rainfall', 'Avg T', 'Min T', 'Max T']
-    if not all(col in df.columns for col in required_columns):
-        raise ValueError(f"Input Excel file must contain columns: {', '.join(required_columns)}")
-    if df.isnull().values.any():
-        raise ValueError("Missing values found. Clean the data before processing.")
-    numeric_cols = ['Rainfall', 'Avg T', 'Min T', 'Max T']
-    for col in numeric_cols:
-        if not pd.api.types.is_numeric_dtype(df[col]):
-            raise TypeError(f"Column '{col}' must contain only numeric values.")
-    if not df['Month'].between(1, 12).all():
-        raise ValueError("The 'Month' column must contain integer values between 1 and 12.")
-    # --- End Validation ---
-
-    # --- Calculations ---
-    monthly_data = df.groupby('Month').agg({
-        'Rainfall': 'mean',
-        'Max T': 'mean',
-        'Min T': ['mean', 'min']
-    })
-    monthly_data.columns = ['Avg Rain', 'Avg Max T', 'Avg Min T', 'Abs Min T']
-    monthly_data = monthly_data.reset_index() # plot_walter_lieth requires the month
-
-    abs_min_temp = df['Min T'].min()
-    abs_max_temp = df['Max T'].max()
-    # --- End Calculations ---
-
-    # --- Create Output DataFrame ---
-    output_df = pd.DataFrame({
-        'Mean precipitation (mm)': monthly_data['Avg Rain'],
-        'Mean maximum daily temperature': monthly_data['Avg Max T'],
-        'Mean minimum daily temperature': monthly_data['Avg Min T'],
-        'Absolute monthly minimum temperature': monthly_data['Abs Min T']
-    }).transpose().reset_index()
-    output_df = output_df.rename(columns={'index': ''})
-    months_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    output_df.columns = [''] + months_order
-    # --- End Create Output DataFrame ---
-
-    # --- Generate Output Text ---
-    output_text_buffer = io.StringIO()  # Use StringIO for efficient string building
-    output_text_buffer.write("## Mean precipitation in mm\n")
-    output_text_buffer.write(f"mean_prec <- c({', '.join(map(str, monthly_data['Avg Rain'].round(1)))})\n\n")
-    output_text_buffer.write("## Mean maximum daily temperature\n")
-    output_text_buffer.write(f"m_max_dt <- c({', '.join(map(str, monthly_data['Avg Max T'].round(1)))})\n\n")
-    output_text_buffer.write("## Mean minimum daily temperature\n")
-    output_text_buffer.write(f"m_min_dt <- c({', '.join(map(str, monthly_data['Avg Min T'].round(1)))})\n\n")
-    output_text_buffer.write("## Absolute monthly minimum temperature\n")
-    output_text_buffer.write(f"abs_m_min_t <- c({', '.join(map(str, monthly_data['Abs Min T'].round(1)))})\n\n")
-    output_text_buffer.write(f"Absolute min T: {abs_min_temp}\n")
-    output_text_buffer.write(f"Absolute max T: {abs_max_temp}\n")
-
-    output_text = output_text_buffer.getvalue()
-    output_text_buffer.close()
-
-    return output_df, output_text, monthly_data  # Return monthly_data
-
-
-st.title("Climate Data Processor")
-
-# --- Optional Inputs (Station Info) ---
-station_name = st.text_input("Station Name (Optional):")
-elevation = st.number_input("Elevation (meters, Optional):", value=None, format="%d")  # Integer format
-period_of_observation = st.text_input("Period of Observation (Optional, e.g., 1991-2020):")
-
-
-uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
+uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
 if uploaded_file is not None:
     try:
         df = pd.read_excel(uploaded_file)
+        # --- Data Validation ---
+        required_columns = ["Year", "Month", "Rain", "Tavg", "Tmin", "Tmax"]
+        if not all(col in df.columns for col in required_columns):
+            st.error(f"Error: The Excel file must contain the following columns: {', '.join(required_columns)}")
+        else:
+          #check for complete year, no missing data
+          df['YearMonth'] = pd.to_datetime(df[['Year', 'Month']].assign(DAY=1))
+          if not (df.groupby('Year')['Month'].count() == 12).all():
+              st.error("Error: Only full years with no missing monthly data should be included.")
+          else: #all data validation passed
+            st.header("Input Data")
+            st.dataframe(df)
+            
+            # --- Data Processing ---
+            #calculate averages for each month
+            monthly_avg = df.groupby('Month').agg({
+                'Rain': 'mean',
+                'Tmax': 'mean',
+                'Tmin': 'mean',
+                'Tmin': 'min',  # Absolute monthly minimum (lowest of Tmin)
+                'Tmax': 'max'   # Absolute monthly maximum (highest of Tmax)
+            }).reset_index()
 
-        st.subheader("Input Data")
-        st.dataframe(df)
+            monthly_avg.rename(columns={
+                'Rain': 'Mean Precipitation (mm)',
+                'Tmax': 'Mean maximum daily temperature (°C)',
+                'Tmin': 'Absolute monthly minimum temperature (°C)'
+            }, inplace=True)
+            
+            abs_min_temp = df['Tmin'].min()
+            abs_max_temp = df['Tmax'].max()
 
-        if st.button("Process Data"):
-            try:
-                output_df, output_text, monthly_data = process_climate_data(df)
+            mean_year_temp = df['Tavg'].mean()
+            sum_year_precipitation = df['Rain'].sum()
 
-                st.subheader("Output Data")
-                st.dataframe(output_df)
+            st.header("Output Data")
+            st.dataframe(monthly_avg)
+            st.write(f"Absolute minimum temperature (°C): {abs_min_temp:.1f}")
+            st.write(f"Absolute maximum temperature (°C): {abs_max_temp:.1f}")
 
-                st.subheader("Output Text (Copyable)")
-                st.text_area("", output_text, height=300)
+            #output for climatol
+            st.header("Output text for climatol/diagwl")
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Mean Precipitation (mm)']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Mean maximum daily temperature (°C)']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Absolute monthly minimum temperature (°C)']])
+            
+            st.text(f"c({rain_str}),\nc({tmax_str}),\nc({tmin_abs_str})")
 
-                # Walter-Lieth Diagram
-                st.subheader("Walter-Lieth Climate Diagram")
-                try:
-                    fig = plot_walter_lieth(monthly_data, station_name, elevation, period_of_observation)
-                    st.pyplot(fig)  # Display the matplotlib figure
-                except (ValueError, TypeError) as e:
-                    st.error(f"Error creating Walter-Lieth diagram: {e}")
 
-            except (ValueError, TypeError) as e:
-                st.error(f"Error processing data: {e}")
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
+            # --- Walter-Lieth Diagram Generation ---
+            st.header("Walter-Lieth Diagram")
+
+            fig, ax1 = plt.subplots(figsize=(10, 6))
+
+            # --- Axis Setup ---
+            months = monthly_avg['Month']  # x axis
+            ax1.set_xticks(months)
+            ax1.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], color='black')
+            ax1.set_xlabel("Month", color='black')
+
+            ax1.set_ylabel("Temperature (°C)", color='red')
+            ax1.tick_params(axis='y', labelcolor='red')
+            ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+            ax2.set_ylabel("Precipitation (mm)", color='blue')
+            ax2.tick_params(axis='y', labelcolor='blue')
+
+            # --- Plotting Data ---
+            temp_line, = ax1.plot(months, monthly_avg['Mean maximum daily temperature (°C)'], color='red', label="Temperature")
+            precip_line, = ax2.plot(months, monthly_avg['Mean Precipitation (mm)'], color='blue', label="Precipitation")
+
+            # --- Scaling ---
+            # Manually set limits to ensure 2:1 ratio
+            temp_min = min(0, monthly_avg['Mean maximum daily temperature (°C)'].min())
+            temp_max = max(50, monthly_avg['Mean maximum daily temperature (°C)'].max()) #at least to 50
+
+            ax1.set_ylim(temp_min, temp_max)
+
+            #ensure 2:1 ratio, and handle crossing 0.
+            precip_min = min(0, monthly_avg['Mean Precipitation (mm)'].min())
+
+            if temp_max <= 50:
+                ax2.set_ylim(precip_min, temp_max*2)
+            else:
+                ax2.set_ylim(precip_min, 100) #temp_max*2) #max precip axes 100
+
+            # --- Humid and Arid Periods ---
+            for i in range(len(months)):
+                if monthly_avg['Mean Precipitation (mm)'][i+1] > monthly_avg['Mean maximum daily temperature (°C)'][i+1] * 2:
+                   ax1.fill_between(
+                        [months[i], months[i] + 1],
+                        [monthly_avg['Mean maximum daily temperature (°C)'][i+1],monthly_avg['Mean maximum daily temperature (°C)'][i+1]],
+                        [monthly_avg['Mean Precipitation (mm)'][i+1]/2, monthly_avg['Mean Precipitation (mm)'][i+1]/2],
+                        color='blue', alpha=0.4, hatch='///', edgecolor='blue',linewidth=0.0)  # Humid: blue stripes.  Hatch, color, etc.
+                elif monthly_avg['Mean Precipitation (mm)'][i+1] < monthly_avg['Mean maximum daily temperature (°C)'][i+1]*2:
+                    ax1.fill_between([months[i], months[i] + 1],
+                                     [monthly_avg['Mean maximum daily temperature (°C)'][i+1], monthly_avg['Mean maximum daily temperature (°C)'][i+1]],
+                                     [monthly_avg['Mean Precipitation (mm)'][i+1]/2, monthly_avg['Mean Precipitation (mm)'][i+1]/2],
+                                      color='red', alpha=0.2, hatch='...', edgecolor='red', linewidth=0.0) #Dry, red dots
+                                     
+
+
+            # --- Frost Bars ---
+            for i in range(len(months)):
+                if monthly_avg['Absolute monthly minimum temperature (°C)'][i+1] < 0:
+                    ax1.bar(months[i] , height=5, bottom=-5, width=0.6, color='lightblue', align='center') #below zero
+
+
+            # --- Top Text ---
+            #top middle
+            plt.text(6, temp_max * 1.05,
+                     f"{station_location} #{station_number} ({station_elevation}) [{station_coordinates}]",
+                     ha='center', va='bottom', fontsize=12)
+            
+            #top left
+            years = sorted(df['Year'].unique())
+            plt.text(0.5, temp_max*1.05, f"{years[0]} - {years[-1]}", ha='left', va='bottom', fontsize=10)
+            #top right
+            plt.text(12.5, temp_max*1.05, f"{mean_year_temp:.1f} °C | {sum_year_precipitation:.0f} mm", ha='right', va='bottom', fontsize=12)
+
+            #left side middle, absolute temps
+            ax1.text(-0.5, (temp_max+abs_max_temp)/2, f"{abs_max_temp:.1f} °C", ha='right', va='center', color='red', fontsize=10)
+            ax1.text(-0.5, (temp_min+abs_min_temp)/2, f"{abs_min_temp:.1f} °C", ha='right', va='top', color='blue', fontsize=10)
+
+            plt.tight_layout()  # Adjust layout to make room for the title and labels
+            st.pyplot(fig)
 
     except Exception as e:
-        st.error(f"Error loading input data: {e}")
+        st.error(f"An error occurred: {e}")
