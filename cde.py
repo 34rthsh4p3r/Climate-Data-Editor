@@ -76,6 +76,7 @@ if uploaded_file is not None:
                 st.text(f"c({rain_str}),\nc({tmax_str}),\nc({tmin_mean_str}),\nc({tmin_abs_str})")
 
 
+
                 # --- Walter-Lieth Diagram Generation ---
                 st.header("Walter-Lieth Diagram")
 
@@ -94,14 +95,8 @@ if uploaded_file is not None:
                 ax2.set_ylabel("Precipitation (mm)", color='blue')
                 ax2.tick_params(axis='y', labelcolor='blue')
 
-                # --- Plotting Data ---  Plot lines *after* shading, to be on top.
-                # temp_line, = ax1.plot(months, monthly_avg['Mean_Tmax'], color='red', label="Temperature")
-                # temp_min_line, = ax1.plot(months, monthly_avg['Mean_Tmin'], color='orange', label="Min Temperature", linestyle='dashed')
-                # precip_line, = ax2.plot(months, monthly_avg['Mean_Rain'], color='blue', label="Precipitation")
-
-
                 # --- Scaling ---
-                temp_min = min(0, monthly_avg['Mean_Tmax'].min())
+                temp_min = min(0, monthly_avg['Mean_Tmin'].min())  # Use Mean_Tmin for lower bound
                 temp_max = max(50, monthly_avg['Mean_Tmax'].max())
 
                 ax1.set_ylim(temp_min, temp_max)
@@ -111,52 +106,54 @@ if uploaded_file is not None:
                 if temp_max <= 50:
                     ax2.set_ylim(precip_min, temp_max*2)
                 else:
-                    ax2.set_ylim(precip_min, 100)
+                    ax2.set_ylim(precip_min, 100)  # Cap at 100, not temp_max*2
 
                 # --- Humid and Arid Periods (Climatol style) ---
-
-                # 1. Humid (Vertical Lines)
-                m = np.array(months)  # For polygon, need numpy arrays
+                m = np.array(months)
                 precip = np.array(monthly_avg['Mean_Rain'])
-                temp = np.array(monthly_avg['Mean_Tmax']) * 2  # Scale temp for comparison
+                temp = np.array(monthly_avg['Mean_Tmax']) * 2
 
-                ax1.fill_between(m, precip, temp, where=(precip > temp), color="#0E67F5", alpha=0.8, hatch='||', edgecolor="#0E67F5", linewidth=0.0) #humid
+                # 1. Humid (Vertical Lines) -  Fill *between* precip and 2*temp
+                ax1.fill_between(m, precip, temp, where=(precip >= temp), color="#0E67F5", alpha=0.8, hatch='||', edgecolor="#0E67F5", linewidth=0.0)
 
-                # 2. "Wet" Period (> 100 mm, solid blue) - Climatol "cheat"
-                wet = np.where(precip > 100, precip, 100)  # Clip to 100mm
-                ax1.fill_between(m, wet, 100, where=(wet > 100), color="#0E67F5")  # Fill above 100mm
-                ax1.fill_between(m, precip +0.2, 100.2, color="white", edgecolor="white", linewidth=0.0)  # "Remove" overlap - white polygon
+                # 2. "Wet" Period (> 100 mm, solid blue)
+                wet = np.where(precip > 100, precip, 100)
+                ax1.fill_between(m, wet, 100, where=(precip > 100), color="#0E67F5")
+                # "Cheat" to cover up extra solid blue
+                ax1.fill_between(m, precip, np.maximum(precip, 100), color='white', edgecolor='white', linewidth=0)
 
-                # 3. Dry Period (Red Dots) - Climatol "cheat"
+                # 3. Dry Period (Red Dots)
                 dry = np.where(precip < temp, temp, precip)
-                ax1.fill_between(m, dry + 0.4, precip - 0.4, color='white', edgecolor="white", linewidth=0.0)  # Remove vertical lines
-                ax1.fill_between(m, dry - 0.15, precip + 0.15, color="#FA4141", alpha=0.6, hatch='....', edgecolor="#FA4141", linewidth=0.0) #dots
+                ax1.fill_between(m, temp, precip, where=(precip < temp), color='white', edgecolor='white', linewidth=0) #cover with white
+                ax1.fill_between(m, temp, precip, where=(precip < temp), color="#FA4141", alpha=0.6, hatch='....', edgecolor="#FA4141", linewidth=0.0)
 
-                # --- Plot lines *AFTER* the shading, so they are on top ---
+                # --- Plot lines *AFTER* the shading ---
                 ax1.plot(months, monthly_avg['Mean_Tmax'], color="#FA4141", linewidth=2.4, label="Temperature")
-                ax1.plot(months, monthly_avg['Mean_Tmin'], color='orange', linestyle='dashed', linewidth=2.4, label="Min Temperature")
+                ax1.plot(months, monthly_avg['Mean_Tmin'], color="#FA4141", linestyle='dashed', linewidth=1.5, label="Min Temperature") #changed to dashed red
                 ax2.plot(months, monthly_avg['Mean_Rain'], color="#0E67F5", linewidth=2.4, label="Precipitation")
+
 
                 # --- Frost Bars ---
                 for i in range(len(months)):
                     if monthly_avg['Absolute_Monthly_Tmin'][i] < 0:
-                        ax1.bar(months[i] , height=5, bottom=-5, width=0.6, color='lightblue', align='center')
+                        ax1.bar(months[i], height=2, bottom=-2, width=0.6, color='lightblue', align='center') #frostbar smaller
 
 
-                # --- Top Text ---
-                plt.text(6, temp_max * 1.05,
+                # --- Top Text --- (Moved to top, using figure coordinates)
+                fig.text(0.5, 0.95,
                         f"{station_location} #{station_number} ({station_elevation}) [{station_coordinates}]",
-                        ha='center', va='bottom', fontsize=12)
+                        ha='center', va='top', fontsize=12)
 
                 years = sorted(df['Year'].unique())
-                plt.text(0.5, temp_max*1.05, f"{years[0]} - {years[-1]}", ha='left', va='bottom', fontsize=10)
+                fig.text(0.15, 0.95, f"{years[0]} - {years[-1]}", ha='left', va='top', fontsize=10)
 
-                plt.text(12.5, temp_max*1.05, f"{mean_year_temp:.1f} °C | {sum_year_precipitation:.0f} mm", ha='right', va='bottom', fontsize=12)
+                fig.text(0.85, 0.95, f"{mean_year_temp:.1f} °C | {sum_year_precipitation:.0f} mm", ha='right', va='top', fontsize=12)
 
-                ax1.text(-0.5, (temp_max+Absolute_Tmax)/2, f"{Absolute_Tmax:.1f} °C", ha='right', va='center', color='red', fontsize=10)
-                ax1.text(-0.5, (temp_min+Absolute_Tmin)/2, f"{Absolute_Tmin:.1f} °C", ha='right', va='top', color='blue', fontsize=10)
+                # Absolute Temps (Moved and adjusted position)
+                fig.text(0.05, 0.80, f"{Absolute_Tmax:.1f} °C", ha='left', va='top', color='red', fontsize=10)  # Left, higher
+                fig.text(0.05, 0.75, f"{Absolute_Tmin:.1f} °C", ha='left', va='top', color='blue', fontsize=10) # Left, a bit below max
 
-                plt.tight_layout()
+                plt.tight_layout(rect=[0, 0, 1, 0.93])  # Adjust layout for top text
                 st.pyplot(fig)
 
     except Exception as e:
