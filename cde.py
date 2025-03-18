@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import openpyxl
 
 def process_climate_data(df):
     """Processes the climate data DataFrame.  Moved to a function for better organization."""
