@@ -116,7 +116,7 @@ if uploaded_file is not None:
 
 
                 # --- Humid and Arid Periods ---
-                for i in range(len(months)):
+                for i in range(len(months) - 1):  # Iterate up to the second-to-last element
                     if monthly_avg['Mean_Rain'][i+1] > monthly_avg['Mean_Tmax'][i+1] * 2:
                         ax1.fill_between(
                             [months[i], months[i] + 1],
@@ -131,8 +131,8 @@ if uploaded_file is not None:
 
 
                 # --- Frost Bars ---
-                for i in range(len(months)):
-                    if monthly_avg['Absolute_Monthly_Tmin'][i+1] < 0:
+                for i in range(len(months)):  # No change needed here, this loop is correct.
+                    if monthly_avg['Absolute_Monthly_Tmin'][i] < 0:  # Correct indexing: use [i]
                         ax1.bar(months[i] , height=5, bottom=-5, width=0.6, color='lightblue', align='center')
 
 
