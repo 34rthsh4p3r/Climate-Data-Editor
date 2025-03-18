@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt  # Import but don't use it directly for plotting in this example
+import matplotlib.pyplot as plt  # Import but don't use it directly
 import numpy as np
-import io  # Import io for creating an in-memory text stream
+import io
 
 # Set page configuration
 st.set_page_config(page_title="Climate Data Editor", layout="wide")
@@ -14,8 +14,8 @@ st.write("Excel data should have these specific columns: Year, Month, Rain, Tavg
 uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
 # --- Station Information Input ---
-station_name = st.text_input("Enter Station Name:", value="StationName")  # Default value
-elevation = st.text_input("Enter Elevation (in meters):", value="Altitude") # Default Value
+station_name = st.text_input("Enter Station Name:", value="StationName")
+elevation = st.text_input("Enter Elevation (in meters):", value="Altitude")
 
 if uploaded_file is not None:
     try:
@@ -32,14 +32,13 @@ if uploaded_file is not None:
             monthly_avg = df.groupby('Month').agg({
                 'Rain': 'mean',
                 'Tmax': 'mean',
-                'Tmin': 'mean',
-                'Tmin': ['mean', 'min'], # Keep both mean and min of Tmin
-                'Tmax': 'max'
-            }).reset_index()
-
-            # Correct the column names after multi-level aggregation
-            monthly_avg.columns = ['Month', 'Mean_Rain', 'trash', 'Mean_Tmin', 'Absolute_Monthly_Tmin','Mean_Tmax']
-            monthly_avg = monthly_avg.drop('trash', axis=1) # Drop trash
+                'Tmin': ['mean', 'min'],  # Correct: Keep Tmin aggregated
+                'Tmax': 'max'  #Keep tmax aggregated to avoid repetition
+            })
+            # Flatten the MultiIndex columns *correctly*
+            monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
+            monthly_avg = monthly_avg.reset_index()  # Reset index *after* flattening
+          #  st.write(monthly_avg.columns) # For debugging, uncomment to check the column names
 
             Absolute_Tmin = df['Tmin'].min()
             Absolute_Tmax = df['Tmax'].max()
@@ -56,13 +55,13 @@ if uploaded_file is not None:
             st.header("Output text for climatol/diagwl")
 
             # Prepare data for climatol
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Mean_Rain']])
-            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Mean_Tmax']])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Mean_Tmin']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Absolute_Monthly_Tmin']])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']]) #Tmax values
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']]) #tmin values
 
 
-            # Create the R code string using an in-memory text stream
+            # Create the R code string
             output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
             output_buffer.write(f"precipitation <- c({rain_str})\n")
@@ -74,17 +73,14 @@ if uploaded_file is not None:
             output_buffer.write("  mean_monthly_tmax,\n")
             output_buffer.write("  mean_monthly_tmin,\n")
             output_buffer.write("  absolute_monthly_min_t)\n\n")
-            output_buffer.write(f"diagwl(data.matrix,\n")
-            output_buffer.write(f'       est="{station_name}",\n')  # Use user-input station name
+            output_buffer.write(f'diagwl(data.matrix,\n')
+            output_buffer.write(f'       est="{station_name}",\n')
             output_buffer.write(f'       cols=NULL,\n')
-            output_buffer.write(f'       alt="{elevation}",\n')  # Use user-input elevation
+            output_buffer.write(f'       alt="{elevation}",\n')
             output_buffer.write(f'       mlab="en")\n')
 
             # Display the code and allow copying
             st.code(output_buffer.getvalue(), language="r")
-
-
-            #Close Buffer
             output_buffer.close()
 
     except Exception as e:
