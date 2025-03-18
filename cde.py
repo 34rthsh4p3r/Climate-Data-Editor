@@ -82,6 +82,28 @@ def plot_walter_lieth(df, station_name="", elevation=None, period_of_observation
     ax1.set_ylim(0, ax1_ymax)
     ax2.set_ylim(0, ax2_ymax)
 
+    # Add shaded areas (Humid and Arid periods)
+    for i in range(len(df)):
+        # Adjust comparison for scaled precipitation
+        precip_scaled = min(df['Avg Rain'].iloc[i], 100) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10) #Corrected scaling
+
+        if precip_scaled > df['Avg Max T'].iloc[i'] * 2:
+            ax2.fill_between(
+                [df['Month'].iloc[i] - 0.4, df['Month'].iloc[i] + 0.4],
+                [min(100, df['Avg Max T'].iloc[i] * 2) + max(0,(df['Avg Max T'].iloc[i] * 2 - 100)/10), min(100, df['Avg Max T'].iloc[i] * 2) + max(0,(df['Avg Max T'].iloc[i] * 2 - 100)/10)],  # Adjusted for scaling!
+                [min(100,df['Avg Rain'].iloc[i]) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10), min(100,df['Avg Rain'].iloc[i]) + max(0, (df['Avg Rain'].iloc[i] - 100) / 10)],
+                color="blue",
+                alpha=0.2
+            )
+        if precip_scaled < df['Avg Max T'].iloc[i'] * 2:
+            ax1.fill_between(
+                [df['Month'].iloc[i] - 0.4, df['Month'].iloc[i] + 0.4],
+                [min(50, df['Avg Rain'].iloc[i]/2) + max(0,(df['Avg Rain'].iloc[i]/2 - 50)), min(50, df['Avg Rain'].iloc[i]/2) + max(0,(df['Avg Rain'].iloc[i]/2 - 50))],
+                [df['Avg Max T'].iloc[i], df['Avg Max T'].iloc[i]],
+                color="red",
+                alpha=0.2
+            )
+
     # Add title and legend
     title = "Walter-Lieth Climate Diagram"
     if station_name:
@@ -153,9 +175,13 @@ def process_climate_data(df):
 
     # --- Generate Output Text ---
     output_text_buffer = io.StringIO()  # Use StringIO for efficient string building
+    output_text_buffer.write("## Mean precipitation in mm\n")
     output_text_buffer.write(f"mean_prec <- c({', '.join(map(str, monthly_data['Avg Rain'].round(1)))})\n\n")
+    output_text_buffer.write("## Mean maximum daily temperature\n")
     output_text_buffer.write(f"m_max_dt <- c({', '.join(map(str, monthly_data['Avg Max T'].round(1)))})\n\n")
+    output_text_buffer.write("## Mean minimum daily temperature\n")
     output_text_buffer.write(f"m_min_dt <- c({', '.join(map(str, monthly_data['Avg Min T'].round(1)))})\n\n")
+    output_text_buffer.write("## Absolute monthly minimum temperature\n")
     output_text_buffer.write(f"abs_m_min_t <- c({', '.join(map(str, monthly_data['Abs Min T'].round(1)))})\n\n")
     output_text_buffer.write(f"Absolute min T: {abs_min_temp}\n")
     output_text_buffer.write(f"Absolute max T: {abs_max_temp}\n")
