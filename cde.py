@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import io
-import openpyxl
+import openpyxl  # Import openpyxl
+
 
 def process_climate_data(df):
     """Processes the climate data DataFrame.  Moved to a function for better organization."""
@@ -44,8 +45,6 @@ def process_climate_data(df):
     output_df.columns = [''] + months_order
     # --- End Create Output DataFrame ---
 
-
-
     # --- Generate Output Text ---
     output_text_buffer = io.StringIO()  # Use StringIO for efficient string building
     output_text_buffer.write("## Mean precipitation in mm\n")
@@ -63,7 +62,6 @@ def process_climate_data(df):
     output_text_buffer.close()
 
     return output_df, output_text
-
 
 
 st.title("Climate Data Processor")
@@ -91,7 +89,6 @@ if uploaded_file is not None:
                 st.error(f"Error processing data: {e}")
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
-
 
     except Exception as e:
         st.error(f"Error loading input data: {e}")
