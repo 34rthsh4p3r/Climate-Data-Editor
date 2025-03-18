@@ -76,7 +76,6 @@ if uploaded_file is not None:
                 st.text(f"c({rain_str}),\nc({tmax_str}),\nc({tmin_mean_str}),\nc({tmin_abs_str})")
 
 
-
                 # --- Walter-Lieth Diagram Generation ---
                 st.header("Walter-Lieth Diagram")
 
@@ -95,10 +94,10 @@ if uploaded_file is not None:
                 ax2.set_ylabel("Precipitation (mm)", color='blue')
                 ax2.tick_params(axis='y', labelcolor='blue')
 
-                # --- Plotting Data ---
-                temp_line, = ax1.plot(months, monthly_avg['Mean_Tmax'], color='red', label="Temperature")
-                temp_min_line, = ax1.plot(months, monthly_avg['Mean_Tmin'], color='orange', label="Min Temperature", linestyle='dashed')
-                precip_line, = ax2.plot(months, monthly_avg['Mean_Rain'], color='blue', label="Precipitation")
+                # --- Plotting Data ---  Plot lines *after* shading, to be on top.
+                # temp_line, = ax1.plot(months, monthly_avg['Mean_Tmax'], color='red', label="Temperature")
+                # temp_min_line, = ax1.plot(months, monthly_avg['Mean_Tmin'], color='orange', label="Min Temperature", linestyle='dashed')
+                # precip_line, = ax2.plot(months, monthly_avg['Mean_Rain'], color='blue', label="Precipitation")
 
 
                 # --- Scaling ---
@@ -114,25 +113,33 @@ if uploaded_file is not None:
                 else:
                     ax2.set_ylim(precip_min, 100)
 
+                # --- Humid and Arid Periods (Climatol style) ---
 
-                # --- Humid and Arid Periods ---
-                for i in range(len(months) - 1):  # Iterate up to the second-to-last element
-                    if monthly_avg['Mean_Rain'][i+1] > monthly_avg['Mean_Tmax'][i+1] * 2:
-                        ax1.fill_between(
-                            [months[i], months[i] + 1],
-                            [max(monthly_avg['Mean_Tmax'][i+1], monthly_avg['Mean_Rain'][i+1]/2), max(monthly_avg['Mean_Tmax'][i+1], monthly_avg['Mean_Rain'][i+1]/2)],
-                            [monthly_avg['Mean_Rain'][i+1]/2, monthly_avg['Mean_Rain'][i+1]/2],
-                            color='blue', alpha=0.4, hatch='///', edgecolor='blue',linewidth=0.0)
-                    elif monthly_avg['Mean_Rain'][i+1] < monthly_avg['Mean_Tmax'][i+1]*2:
-                        ax1.fill_between([months[i], months[i] + 1],
-                                            [min(monthly_avg['Mean_Tmax'][i+1], monthly_avg['Mean_Rain'][i+1]/2),min(monthly_avg['Mean_Tmax'][i+1], monthly_avg['Mean_Rain'][i+1]/2)],
-                                            [monthly_avg['Mean_Rain'][i+1]/2, monthly_avg['Mean_Rain'][i+1]/2],
-                                            color='red', alpha=0.2, hatch='...', edgecolor='red', linewidth=0.0)
+                # 1. Humid (Vertical Lines)
+                m = np.array(months)  # For polygon, need numpy arrays
+                precip = np.array(monthly_avg['Mean_Rain'])
+                temp = np.array(monthly_avg['Mean_Tmax']) * 2  # Scale temp for comparison
 
+                ax1.fill_between(m, precip, temp, where=(precip > temp), color="#0E67F5", alpha=0.8, hatch='||', edgecolor="#0E67F5", linewidth=0.0) #humid
+
+                # 2. "Wet" Period (> 100 mm, solid blue) - Climatol "cheat"
+                wet = np.where(precip > 100, precip, 100)  # Clip to 100mm
+                ax1.fill_between(m, wet, 100, where=(wet > 100), color="#0E67F5")  # Fill above 100mm
+                ax1.fill_between(m, precip +0.2, 100.2, color="white", edgecolor="white", linewidth=0.0)  # "Remove" overlap - white polygon
+
+                # 3. Dry Period (Red Dots) - Climatol "cheat"
+                dry = np.where(precip < temp, temp, precip)
+                ax1.fill_between(m, dry + 0.4, precip - 0.4, color='white', edgecolor="white", linewidth=0.0)  # Remove vertical lines
+                ax1.fill_between(m, dry - 0.15, precip + 0.15, color="#FA4141", alpha=0.6, hatch='....', edgecolor="#FA4141", linewidth=0.0) #dots
+
+                # --- Plot lines *AFTER* the shading, so they are on top ---
+                ax1.plot(months, monthly_avg['Mean_Tmax'], color="#FA4141", linewidth=2.4, label="Temperature")
+                ax1.plot(months, monthly_avg['Mean_Tmin'], color='orange', linestyle='dashed', linewidth=2.4, label="Min Temperature")
+                ax2.plot(months, monthly_avg['Mean_Rain'], color="#0E67F5", linewidth=2.4, label="Precipitation")
 
                 # --- Frost Bars ---
-                for i in range(len(months)):  # No change needed here, this loop is correct.
-                    if monthly_avg['Absolute_Monthly_Tmin'][i] < 0:  # Correct indexing: use [i]
+                for i in range(len(months)):
+                    if monthly_avg['Absolute_Monthly_Tmin'][i] < 0:
                         ax1.bar(months[i] , height=5, bottom=-5, width=0.6, color='lightblue', align='center')
 
 
