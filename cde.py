@@ -294,13 +294,15 @@ def usage_page():
 
 def data_source_page():
     st.header("Data Source (Hungarian Meteorological Service)")
-
-    # Add the image here
-    st.image("HungaroMet_logo_800x_ENG", width=800)
-    
     st.write("""
     This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
+    """)
 
+    # Add the image here
+    st.image("hungaromet_logo.png", width=800)  # Assuming the image is named 'hungaromet_logo.png'
+
+
+    st.write("""
     Data Access: [Monthly climate data for Hungarian stations](https://odp.met.hu/climate/observations_hungary/monthly/historical/)
 
     Station Metadata: [Station metadata](https://odp.met.hu/climate/observations_hungary/monthly/station_meta_auto.csv)
