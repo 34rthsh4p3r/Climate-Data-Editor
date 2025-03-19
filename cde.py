@@ -8,11 +8,6 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 # --- Page Functions ---
 
 def Editor_page():
-    st.title("Climate Data Editor (CDE) for Walter-Lieth Diagrams")
-    st.write("""
-    This application helps you prepare climate data for creating Walter-Lieth diagrams using the `climatol` package in R. It takes monthly climate data, validates it, performs calculations, and generates the R code needed for the `diagwl` function.
-    """)
-
     st.header("Upload Climate Data")
     st.write("""
     Excel data can be in one of three formats:
@@ -317,7 +312,6 @@ def data_source_page():
     """)
 
 def about_page():
-    st.header("About")
     st.subheader("Contributing")
     st.write("""
     Contributions are welcome! If you'd like to contribute:
