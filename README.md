@@ -64,13 +64,13 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 *   **Tmax:** Maximum monthly temperature (e.g., in °C).
 *   **Input Data Example:**
 
-  | Year | Month | Rain | Tavg | Tmin  | Tmax  |
-  |------|-------|------|------|-------|-------|
-  | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
-  | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
-  | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
-  | ...  | ...   | ...  | ...  | ...   | ...   |
-  | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
+     | Year | Month | Rain | Tavg | Tmin  | Tmax  |
+     |------|-------|------|------|-------|-------|
+     | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
+     | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
+     | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
+     | ...  | ...   | ...  | ...  | ...   | ...   |
+     | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
 
 The column names must be *exactly* as listed above, including capitalization. The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
 
