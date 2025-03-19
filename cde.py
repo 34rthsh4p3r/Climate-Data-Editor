@@ -1,11 +1,96 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt  # Import but don't use it directly
-import numpy as np
 import io
 
 # Set page configuration
 st.set_page_config(page_title="Climate Data Editor", layout="wide")
+
+# --- Introduction and Instructions (from README) ---
+st.title("Climate Data Editor (CDE) for Walter-Lieth Diagrams")
+st.write("""
+This application helps you prepare climate data for creating Walter-Lieth diagrams using the `climatol` package in R.  It takes monthly climate data, validates it, performs calculations, and generates the R code needed for the `diagwl` function.
+""")
+
+st.subheader("Input Data Format")
+st.write("""
+The input Excel file (`.xlsx`) must have the following columns, *exactly* as named (case-sensitive):
+
+*   **Year:** The year of the observation.
+*   **Month:** The month of the observation (1-12).
+*   **Rain:** Monthly precipitation in mm.
+*   **Tavg:** Average monthly temperature in °C.
+*   **Tmin:** Minimum monthly temperature in °C.
+*   **Tmax:** Maximum monthly temperature in °C.
+
+The data should represent a single, continuous time series for one station.  The tool will treat the entire uploaded dataset as belonging to a single location.
+
+**Input Data Example:**
+""")
+
+example_input = pd.DataFrame({
+    'Year': [2014, 2014, 2014, 2024],
+    'Month': [1, 2, 3, 12],
+    'Rain': [36.9, 21.7, 11.6, 14.9],
+    'Tavg': [2.7, 3.9, 9.3, 2.2],
+    'Tmin': [-7.4, -13.5, -2.5, -3.5],
+    'Tmax': [13.8, 15.7, 23.1, 11.2]
+})
+st.dataframe(example_input)
+
+
+
+st.subheader("Usage")
+st.write("""
+1.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
+2.  **Enter Station Information:** Type the station name and elevation (in meters) in the provided text boxes.
+3.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'.  The calculated monthly averages will be displayed in a table labeled 'Output Data'.  Check for any errors.
+4. **Copy R Code:** The generated R code will appear in a code block.  Copy this code.
+5.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
+""")
+
+st.subheader("Output Data Example")
+st.write("""
+The Output data frame that's calculated consists of:
+
+*   **Rain_mean:** The average of all the values of rain for that month.
+*   **Tmax_max:** The maximum temperature of all maximum temperatures for that month.
+*   **Tmin_mean:** The average of all the values of minimum temperatures for that month.
+*   **Tmin_min:** The absolute minimum temperature of all the minimum temperatures for that month.
+""")
+
+example_output = pd.DataFrame({
+     'Month': [1, 2, 12],
+     'Rain_mean': [39.1455, 32.8182, 46.6364],
+     'Tmax_max': [13.8, 21.0, 17.8],
+     'Tmin_mean': [-11.9727, -7.5727, -6.9091],
+     'Tmin_min': [-18.6, -13.5, -12.2]
+})
+st.dataframe(example_output)
+st.write("Absolute minimum temperature (°C): -18.6")
+st.write("Absolute maximum temperature (°C): 40.3")
+
+st.subheader("Example of generated R code")
+st.code("""
+library(climatol)
+
+precipitation <- c(39.1, 32.8, 36.2, 38.4, 50.0, 48.7, 57.9, 54.5, 46.1, 49.3, 42.8, 46.6)
+mean_monthly_tmax <- c(13.8, 21.0, 24.3, 29.8, 34.7, 38.1, 40.3, 39.7, 34.6, 28.8, 21.5, 17.8)
+mean_monthly_tmin <- c(-12.0, -7.6, -4.2, 2.1, 8.5, 13.3, 15.5, 14.6, 9.1, 3.4, -2.3, -6.9)
+absolute_monthly_min_t <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
+
+data.matrix <- rbind(
+  precipitation,
+  mean_monthly_tmax,
+  mean_monthly_tmin,
+  absolute_monthly_min_t)
+
+diagwl(data.matrix,
+        est="Pocsaj",
+        cols=NULL,
+        alt="97",
+        per="1991-2020", # Add the period. Very important for climatol
+        mlab="en")
+""", language='r')
 
 # --- File Upload and Data Validation ---
 st.header("Upload Climate Data")
