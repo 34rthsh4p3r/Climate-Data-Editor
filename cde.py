@@ -299,7 +299,7 @@ def data_source_page():
     """)
 
     # Add the image here
-    st.image("HungaroMet_logo_800x_ENG.png", width=800)  # Assuming the image is named 'hungaromet_logo.png'
+    st.markdown("[![HungaroMet Logo](HungaroMet_logo_800x_ENG.png)](https://www.met.hu/)")
 
 
     st.write("""
