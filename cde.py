@@ -298,7 +298,11 @@ def data_source_page():
     This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
     """)
 
-    # Add the image here, wrapped in a link, and controlling size with HTML
+    # --- TEMPORARY TEST: Does st.image work? ---
+    st.image("HungaroMet_logo_800x_ENG.png")  #  <-- USE THE CORRECT PATH HERE!
+    # st.image("images/HungaroMet_logo_800x_ENG.png") # Example if in 'images' subdirectory.
+
+    # --- HTML for clickable image (with correct path) ---
     st.markdown(
         """
         <a href="https://www.met.hu/">
