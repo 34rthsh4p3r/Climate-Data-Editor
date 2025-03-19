@@ -294,6 +294,10 @@ def usage_page():
 
 def data_source_page():
     st.header("Data Source (Hungarian Meteorological Service)")
+
+    # Add the image here
+    st.image("HungaroMet_logo_800x_ENG", width=800)
+    
     st.write("""
     This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
 
