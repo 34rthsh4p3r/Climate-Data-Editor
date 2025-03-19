@@ -3,7 +3,11 @@
 This Streamlit application, **Climate Data Editor (CDE)**, is designed to simplify the process of preparing climate data for creating Walter-Lieth diagrams using the `climatol` package (specifically the `diagwl` function) in R/RStudio.  It takes raw monthly climate data and transforms it into the specific format required by `climatol`. The app handles data validation, aggregation, and generates the necessary R code.  This tool was initially developed for a project using Hungarian climate data.
 
 **Streamlit App:** [https://cdeditor.streamlit.app/](https://cdeditor.streamlit.app/)
-
+    *   The app is organized into multiple pages:
+    *   **Editor:**  The main page for uploading data and generating the R code.
+    *   **Usage:** Provides detailed instructions on how to use the app and the required input data formats.
+    *   **Data Source:**  Information about the Hungarian Meteorological Service data source.
+    *   **About:**  Information about contributing, maintainer, acknowledgments, and license.
 ---
 
 ## Features
@@ -29,11 +33,7 @@ This Streamlit application, **Climate Data Editor (CDE)**, is designed to simpli
 *   **Data Preview:** Displays both input dataframe ("Input Data") and output dataframe ("Output Data") (monthly average).
 *   **Error Handling:** Shows errors if there are problems with the file or data.
 *   **Copy-Paste Output:** The generated R code is displayed in a code block, ready to be copied.
-*   **Multi-Page App:**  The app is organized into multiple pages:
-    *   **Editor:**  The main page for uploading data and generating the R code.
-    *   **Usage:** Provides detailed instructions on how to use the app and the required input data formats.
-    *   **Data Source:**  Information about the Hungarian Meteorological Service data source.
-    *   **About:**  Information about contributing, maintainer, acknowledgments, and license.
+
 
 ---
 
