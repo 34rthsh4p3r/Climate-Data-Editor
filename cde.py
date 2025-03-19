@@ -15,20 +15,24 @@ def editor_page():
 
     st.header("Upload Climate Data")
     st.write("""
-    Excel data can be in one of two formats:
+    Excel data can be in one of three formats:
 
     **Format 1:** Separate Year and Month columns, along with Rain, Tavg, Tmin, and Tmax.
     **Format 2:** A combined YearMonth column (e.g., 202301 for January 2023), along with Rain, Tavg, Tmin, and Tmax.
-    **Format 3:** Data from the Hungarian Meteorological Service, with columns 'StationName', 'Elevation', 'Time', 'rau' (Rain), 't' (Tavg), 'tn' (Tmin), and 'tx' (Tmax).  'Time' should be in YYYYMM format.
+    **Format 3:** Data from the Hungarian Meteorological Service, with columns 'Time' (YYYYMM), 'rau' (Rain), 't' (Tavg), 'tn' (Tmin), and 'tx' (Tmax).
 
     Only full years with no missing data in the required columns will be processed.
     """)
 
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
-    # We *don't* set default values here. We'll get them from the data if possible.
-    station_name_input = st.text_input("Enter Station Name (or leave blank to use data):", value="")
-    elevation_input = st.text_input("Enter Elevation (in meters) (or leave blank to use data):", value="")
+    # Station Name and Elevation ONLY for non-HMS formats
+    col1, col2 = st.columns(2)
+    with col1:
+        station_name_input = st.text_input("Enter Station Name (only for Formats 1 & 2):", value="StationName")
+    with col2:
+        elevation_input = st.text_input("Enter Elevation (in meters, only for Formats 1 & 2):", value="Altitude")
+
 
     if uploaded_file is not None:
         try:
@@ -37,7 +41,7 @@ def editor_page():
             # --- Data Validation and Preprocessing ---
 
             # 1. Check for Hungarian Meteorological Service format
-            if {'StationName', 'Elevation', 'Time', 'rau', 't', 'tn', 'tx'}.issubset(df.columns):
+            if {'Time', 'rau', 't', 'tn', 'tx'}.issubset(df.columns):
                 st.write("Detected Hungarian Meteorological Service data format.")
                 # Rename columns to standard names
                 df.rename(columns={
@@ -56,18 +60,9 @@ def editor_page():
                 df['Month'] = df['YearMonth'] % 100
                 df.drop(columns=['YearMonth'], inplace=True)
 
-
-                # Try to get station name and elevation from the data.
-                # Use .iloc[0] to get the *first* value, handling cases
-                # where the column might have multiple rows (like a header).
-                station_name = df['StationName'].iloc[0] if 'StationName' in df.columns else ""
-                try:
-                    elevation = str(int(df['Elevation'].iloc[0])) if 'Elevation' in df.columns else "" # Convert to string, keep as integer string.
-                except (ValueError, TypeError):
-                    elevation = ""
-
-
-                df.drop(columns=['StationName', 'Elevation'], inplace=True, errors='ignore') # Drop these now
+                # Station name and elevation are NOT used for HMS format.
+                station_name = station_name_input  # Use input values
+                elevation = elevation_input
 
                 required_columns = ["Year", "Month", "Rain", "Tavg", "Tmin", "Tmax"]
 
@@ -103,7 +98,7 @@ def editor_page():
                     st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns, a combined 'YearMonth' column, OR be in the Hungarian Meteorological Service format.")
                     return
 
-                # For standard formats, get station name and elevation from user input (if provided)
+                # For standard formats, get station name and elevation from user input
                 station_name = station_name_input
                 elevation = elevation_input
 
@@ -164,7 +159,7 @@ def editor_page():
             output_buffer.write("  mean_monthly_tmin,\n")
             output_buffer.write("  absolute_monthly_min_t)\n\n")
             output_buffer.write(f'diagwl(data.matrix,\n')
-            # Use the values obtained from the data OR user input
+            # Use the values obtained from user input
             output_buffer.write(f'       est="{station_name}",\n')
             output_buffer.write(f'       cols=NULL,\n')
             output_buffer.write(f'       alt="{elevation}",\n')
@@ -224,8 +219,6 @@ def usage_page():
 
     st.write("**Format 3: Hungarian Meteorological Service Data**")
     st.write("""
-        *   **StationName:** The name of the meteorological station.
-        *   **Elevation:** The elevation of the station in meters.
         *   **Time:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
         *   **rau:** Monthly precipitation in mm.
         *   **t:** Average monthly temperature in °C.
@@ -234,8 +227,6 @@ def usage_page():
         """)
     st.write("**Example (Hungarian Meteorological Service):**")
     example_input_hms = pd.DataFrame({
-    'StationName': ['Pocsaj', 'Pocsaj', 'Pocsaj', 'Pocsaj'],  # Example with repeated station name
-    'Elevation': [97, 97, 97, 97],          # Example:  Elevation
     'Time': [201401, 201402, 201403, 202412],
     'rau': [36.9, 21.7, 11.6, 14.9],
     't': [2.7, 3.9, 9.3, 2.2],
@@ -249,7 +240,7 @@ def usage_page():
     st.write("""
     1.  **Go to EDITOR Page:** Use the navigation on the top to go to the editor.
     2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
-    3.  **Enter Station Information:**  If your data is *not* in the Hungarian Meteorological Service format, you can optionally enter the station name and elevation in the provided text boxes. If you leave these blank, and your data is *not* in the HMS format, the default values "StationName" and "Altitude" will be used. If your data *is* in HMS format, the station name and elevation will be automatically extracted.
+    3.  **Enter Station Information (Formats 1 & 2 Only):**  If your data is in Format 1 or 2, enter the station name and elevation in the provided text boxes.  For Hungarian Meteorological Service data (Format 3), these fields are ignored.
     4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
     5.  **Copy R Code:** The generated R code will appear in a code block. Copy this code.
     6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
