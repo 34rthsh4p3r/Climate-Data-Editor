@@ -15,7 +15,7 @@ This Streamlit application, **Climate Data Editor (CDE)**, is designed to simpli
     *   Flags any missing values within the required columns.
     *   Validates that 'Month' values are within the range of 1-12.
     *   Only complete years, with data for all 12 months and no missing values in the required columns, will be processed.
-*   **Station Information (Formats 1 & 2):**  Optionally enter the station name and elevation (in meters), which are used in the generated R code.  These are *not* required for the Hungarian Meteorological Service format.
+*   **Station Information:**  Optionally enter the station name and elevation (in meters), which are used in the generated R code. 
 *   **Data Processing:**
     *   Calculates monthly averages for precipitation (Rain), maximum temperature (Tmax), and mean minimum temperature (Tmin_mean).
     *   Calculates the absolute minimum temperature for *each month* (Tmin_min).
@@ -125,7 +125,7 @@ Time	rau	t	tn	tx
 
 1.  **Go to the EDITOR Page:** Use the navigation at the top of the app to select the "EDITOR" page.
 2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
-3.  **Enter Station Information (Formats 1 & 2 Only):** If your data is in Format 1 or 2, enter the station name and elevation (in meters) in the provided text boxes. For Hungarian Meteorological Service data (Format 3), these fields are *ignored*.
+3.  **Enter Station Information:** Enter the station name and elevation (in meters) in the provided text boxes.
 4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
 5.  **Copy R Code:** The generated R code will appear in a code block. Copy this code.
 6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated.
