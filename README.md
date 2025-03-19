@@ -22,6 +22,7 @@ Data Usage Terms: Using climate data from the Hungarian Meteorological Service i
     *   Graphically: Use the HungaroMet logo.
 *   If you substantially transform or process the data, you should mention this in a central reference list or imprint.
 *   If the data is used inappropriately, the source references shall be deleted.
+*   To ask questions or provide feedback on the Meteorological Database, contact: [odp@met.hu](mailto:odp@met.hu)
 
 ---
 
