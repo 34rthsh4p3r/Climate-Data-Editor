@@ -54,12 +54,13 @@ The data should be continuous; no missing values or incomplete years are allowed
 
      | Month | Rain_mean | Tmax_max | Tmin_mean | Tmin_min |
      |-------|-----------|----------|-----------|----------|
-     | 2     | 3         | 27.2636  | 25.1      | -15.7    |
-     | 3     | 4         | 30.4455  | 30.8      | -1.3091  |
+     | 1     | 39.1455   | 13.8     | -11.9727  | -18.6    |
+     | 2     | 32.8182   | 21       | -7.5727   | -13.5    |
      | ...   | ...       | ...      | ...       | ...      |
-     |12     | 46.6364   | 17.8     | -6.9091   | -12.2    |
+     | 12    | 46.6364   | 17.8     | -6.9091   | -12.2    |
      
      Absolute minimum temperature (°C): -18.6
+     
      Absolute maximum temperature (°C): 40.3
      
 
