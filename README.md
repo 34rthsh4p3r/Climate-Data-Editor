@@ -39,7 +39,30 @@ The data should be continuous; no missing values or incomplete years are allowed
 
 1.  **Upload Data:**  Use the "Choose an Excel file" button to upload your climate data file.
 2.  **Enter Station Information:**  Type the station name and elevation (in meters) in the provided text boxes.
-3.  **Review Data:**  The uploaded data and calculated monthly averages will be displayed in tables.  Check for any errors.
+3.  **Review Data:**  The uploaded data and calculated monthly averages will be displayed in tables.  Check for any errors.  
+    *   **Input Data Example:**
+
+        | Year | Month | Rain | Tavg | Tmin  | Tmax  |
+        |------|-------|------|------|-------|-------|
+        | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
+        | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
+        | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
+        | ...  | ...   | ...  | ...  | ...   | ...   |
+        | 2014 | 10     | 67.9  | 12.1 | -2.7   | 27.2  |
+        
+    * **Output Data Example**
+
+     | Month | Rain_mean | Tmax_max | Tmin_mean | Tmin_min |
+     |-------|-----------|----------|-----------|----------|
+     | 2     | 3         | 27.2636  | 25.1      | -15.7    |
+     | 3     | 4         | 30.4455  | 30.8      | -1.3091  |
+     | ...   | ...       | ...      | ...       | ...      |
+     |11     | 12     | 46.6364     |  17.8  | -6.9091      | -12.2|
+     
+     Absolute minimum temperature (°C): -18.6
+     Absolute maximum temperature (°C): 40.3
+     
+
 4.  **Copy R Code:**  The generated R code will appear in a code block.  Copy this code.
 5.  **Run in R/RStudio:**  Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram.  Make sure you have the `climatol` package installed (`install.packages("climatol")`).
 
@@ -48,10 +71,10 @@ The data should be continuous; no missing values or incomplete years are allowed
 ```R
 library(climatol)
 
-precipitation <- c(39.1, 32.8, 27.3, 30.4, 57.9, 54.6, 56.8, 35.6, 48.6, 41.7, 56.4, 46.6)
-mean_monthly_tmax <- c(13.8, 21.0, 25.1, 30.8, 32.2, 38.9, 40.3, 39.1, 36.5, 27.8, 25.0, 17.8)
-mean_monthly_tmin <- c(-12.0, -7.6, -5.6, -1.3, 3.7, 8.5, 9.3, 9.6, 4.3, -1.3, -3.8, -6.9)
-absolute_monthly_min_t <- c(-18.6, -13.5, -15.7, -7.5, 0.0, 7.1, 6.9, 7.2, 0.3, -3.8, -6.0, -12.2)
+precipitation <- c(10.2, 15.5, 25.3, ..., 12.1)
+mean_monthly_tmax <- c(28.5, 29.2, 30.1, ..., 27.8)
+mean_monthly_tmin <- c(18.2, 18.9, 19.5, ..., 17.9)
+absolute_monthly_min_t <- c(15.1, 15.8, 16.3, ..., 14.8)
 
 data.matrix <- rbind(
   precipitation,
@@ -60,7 +83,7 @@ data.matrix <- rbind(
   absolute_monthly_min_t)
 
 diagwl(data.matrix,
-       est="Pocsaj",
+       est="StationName",
        cols=NULL,
-       alt="97",
+       alt="Altitude",
        mlab="en")
