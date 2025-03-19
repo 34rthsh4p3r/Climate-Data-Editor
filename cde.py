@@ -18,7 +18,9 @@ def editor_page():
     Excel data can be in one of three formats:
 
     **Format 1:** Separate Year and Month columns, along with Rain, Tavg, Tmin, and Tmax.
+    
     **Format 2:** A combined YearMonth **or Time** column (e.g., 202301 for January 2023), along with Rain, Tavg, Tmin, and Tmax.
+    
     **Format 3:** Data from the Hungarian Meteorological Service, with columns 'Time' (YYYYMM), 'rau' (Rain), 't' (Tavg), 'tn' (Tmin), and 'tx' (Tmax).
 
     Only full years with no missing data in the required columns will be processed.
@@ -29,9 +31,9 @@ def editor_page():
     # Station Name and Elevation ONLY for non-HMS formats
     col1, col2 = st.columns(2)
     with col1:
-        station_name_input = st.text_input("Enter Station Name (only for Formats 1 & 2):", value="StationName")
+        station_name_input = st.text_input("Enter Station Name:", value="StationName")
     with col2:
-        elevation_input = st.text_input("Enter Elevation (in meters, only for Formats 1 & 2):", value="Altitude")
+        elevation_input = st.text_input("Enter Elevation (in meters):", value="Altitude")
 
 
     if uploaded_file is not None:
