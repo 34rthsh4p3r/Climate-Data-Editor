@@ -90,8 +90,29 @@ def home_page():
             est="Pocsaj",
             cols=NULL,
             alt="97",
+            per="1991-2020", # Add the period. Very important for climatol
             mlab="en")
     """, language='r')
+
+    st.subheader("Data Source (Hungarian Meteorological Service)")
+    st.write("""
+    This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
+
+    Data Access: [Monthly climate data for Hungarian stations](https://odp.met.hu/climate/observations_hungary/monthly/historical/)
+
+    Station Metadata: [Station metadata](https://odp.met.hu/climate/observations_hungary/monthly/station_meta_auto.csv)
+
+    Data Usage Terms: Using climate data from the Hungarian Meteorological Service is bound to general terms and conditions of use. Key points from these terms include:
+
+    *   Data from HungaroMet is freely available.
+    *   Citation is required: When using data, you must cite the source. The recommended citation is:
+        *   Text: Source: Hungarian Meteorological Service
+        *   Graphically: Use the HungaroMet logo.
+    *   If you substantially transform or process the data, you should mention this in a central reference list or imprint.
+    *   If the data is used inappropriately, the source references shall be deleted.
+    *   To ask questions or provide feedback on the Meteorological Database, contact: [odp@met.hu](mailto:odp@met.hu)
+    """)
+
 
     st.subheader("Contributing")
     st.write("""
