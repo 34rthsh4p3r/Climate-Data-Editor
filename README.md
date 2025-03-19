@@ -62,15 +62,15 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 *   **Tavg:** Average monthly temperature (e.g., in °C).
 *   **Tmin:** Minimum monthly temperature (e.g., in °C).
 *   **Tmax:** Maximum monthly temperature (e.g., in °C).
-*    *   **Input Data Example:**
+*   **Input Data Example:**
 
-        | Year | Month | Rain | Tavg | Tmin  | Tmax  |
-        |------|-------|------|------|-------|-------|
-        | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
-        | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
-        | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
-        | ...  | ...   | ...  | ...  | ...   | ...   |
-        | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
+  | Year | Month | Rain | Tavg | Tmin  | Tmax  |
+  |------|-------|------|------|-------|-------|
+  | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
+  | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
+  | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
+  | ...  | ...   | ...  | ...  | ...   | ...   |
+  | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
 
 The column names must be *exactly* as listed above, including capitalization. The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
 
@@ -81,7 +81,6 @@ The column names must be *exactly* as listed above, including capitalization. Th
 1.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
 2.  **Enter Station Information:** Type the station name and elevation (in meters) in the provided text boxes.
 3.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'.  Check for any errors.
-
 
     *   **Output Data Example:**
 
