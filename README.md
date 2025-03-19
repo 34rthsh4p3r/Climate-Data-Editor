@@ -54,14 +54,14 @@ Data Usage Terms: Using climate data from the Hungarian Meteorological Service i
 
 ## Input Data Format
 
-The input Excel file (`.xlsx`) must have the following columns, *exactly* as named:
+The input Excel file (`.xlsx`) must have the columns below, *exactly* as named, without capitalization. The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
 
 *   **Year:** The year of the observation.
 *   **Month:** The month of the observation (1-12).
-*   **Rain:** Monthly precipitation (e.g., in mm).
-*   **Tavg:** Average monthly temperature (e.g., in °C).
-*   **Tmin:** Minimum monthly temperature (e.g., in °C).
-*   **Tmax:** Maximum monthly temperature (e.g., in °C).
+*   **Rain:** Monthly precipitation in mm.
+*   **Tavg:** Average monthly temperature in °C.
+*   **Tmin:** Minimum monthly temperature in °C.
+*   **Tmax:** Maximum monthly temperature in °C.
 *   **Input Data Example:**
 
      | Year | Month | Rain | Tavg | Tmin  | Tmax  |
@@ -72,7 +72,6 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
      | ...  | ...   | ...  | ...  | ...   | ...   |
      | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
 
-The column names must be *exactly* as listed above, including capitalization. The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
 
 ---
 
