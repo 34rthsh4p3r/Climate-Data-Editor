@@ -124,9 +124,13 @@ def editor_page():
 
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
-    # --- Station Information Input ---
-    station_name = st.text_input("Enter Station Name:", value="StationName")
-    elevation = st.text_input("Enter Elevation (in meters):", value="Altitude")
+    # --- Station Information Input (Side-by-Side) ---
+    col1, col2 = st.columns(2)  # Create two columns
+    with col1:
+        station_name = st.text_input("Enter Station Name:", value="StationName")
+    with col2:
+        elevation = st.text_input("Enter Elevation (in meters):", value="Altitude")
+
 
     if uploaded_file is not None:
         try:
@@ -143,13 +147,12 @@ def editor_page():
                 monthly_avg = df.groupby('Month').agg({
                     'Rain': 'mean',
                     'Tmax': 'mean',
-                    'Tmin': ['mean', 'min'],  # Correct: Keep Tmin aggregated
-                    'Tmax': 'max'  #Keep tmax aggregated to avoid repetition
+                    'Tmin': ['mean', 'min'],
+                    'Tmax': 'max'
                 })
                 # Flatten the MultiIndex columns *correctly*
                 monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
-                monthly_avg = monthly_avg.reset_index()  # Reset index *after* flattening
-              #  st.write(monthly_avg.columns) # For debugging, uncomment to check the column names
+                monthly_avg = monthly_avg.reset_index()
 
                 Absolute_Tmin = df['Tmin'].min()
                 Absolute_Tmax = df['Tmax'].max()
@@ -167,9 +170,9 @@ def editor_page():
 
                 # Prepare data for climatol
                 rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
-                tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']]) #Tmax values
+                tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
                 tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
-                tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']]) #tmin values
+                tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
 
 
                 # Create the R code string
