@@ -17,13 +17,12 @@ def editor_page():
     st.write("""
     Excel data can be in one of three formats:
 
-    **Format 1:** Separate Year and Month columns, along with Rain, Tavg, Tmin, and Tmax.
+    **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tavg**, **Tmin**, and **Tmax**.
     
-    **Format 2:** A combined YearMonth **or Time** column (e.g., 202301 for January 2023), along with Rain, Tavg, Tmin, and Tmax.
+    **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tavg**, **Tmin**, and **Tmax**.
     
-    **Format 3:** Data from the Hungarian Meteorological Service, with columns 'Time' (YYYYMM), 'rau' (Rain), 't' (Tavg), 'tn' (Tmin), and 'tx' (Tmax).
+    **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'t'** (Tavg), **'tn'** (Tmin), and **'tx'** (Tmax).
 
-    Only full years with no missing data in the required columns will be processed.
     """)
 
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
@@ -99,7 +98,7 @@ def editor_page():
                     required_columns.extend(['Year', 'Month'])
 
                 else:
-                    st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns, a combined 'YearMonth' column, OR be in the Hungarian Meteorological Service format.")
+                    st.error("Error: The Excel file must contain either separate **'Year'** and **'Month'** columns, a combined **'YearMonth'** or **'Time'** column.")
                     return
 
                 # For standard formats, get station name and elevation from user input
@@ -245,7 +244,7 @@ def usage_page():
     st.write("""
     1.  **Go to EDITOR Page:** Use the navigation on the top to go to the editor.
     2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
-    3.  **Enter Station Information (Formats 1 & 2 Only):**  If your data is in Format 1 or 2, enter the station name and elevation in the provided text boxes.  For Hungarian Meteorological Service data (Format 3), these fields are ignored.
+    3.  **Enter Station Information:**  Enter the station name and elevation in the provided text boxes.
     4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
     5.  **Copy R Code:** The generated R code will appear in a code block. Copy this code.
     6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
