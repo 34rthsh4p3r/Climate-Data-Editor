@@ -42,11 +42,12 @@ def home_page():
 
     st.subheader("Usage")
     st.write("""
-    1.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
-    2.  **Enter Station Information:** Type the station name and elevation (in meters) in the provided text boxes.
-    3.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'.  The calculated monthly averages will be displayed in a table labeled 'Output Data'.  Check for any errors.
-    4. **Copy R Code:** The generated R code will appear in a code block.  Copy this code.
-    5.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
+    1.  **Go to EDITOR Page:** Use the navigation on the left to change to the editor.
+    2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
+    3.  **Enter Station Information:** Type the station name and elevation (in meters) in the provided text boxes.
+    4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'.  The calculated monthly averages will be displayed in a table labeled 'Output Data'.  Check for any errors.
+    5. **Copy R Code:** The generated R code will appear in a code block.  Copy this code.
+    6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
     """)
 
     st.subheader("Output Data Example")
@@ -89,9 +90,31 @@ def home_page():
             est="Pocsaj",
             cols=NULL,
             alt="97",
-            per="1991-2020", # Add the period. Very important for climatol
             mlab="en")
     """, language='r')
+
+    st.subheader("Contributing")
+    st.write("""
+    Contributions are welcome! If you'd like to contribute:
+
+    1.  **Fork the repository.**
+    2.  **Create a new branch:** `git checkout -b feature/your-feature-name`
+    3.  **Make your changes and commit them:** `git commit -m "Add some feature"`
+    4.  **Push to the branch:** `git push origin feature/your-feature-name`
+    5.  **Create a pull request.**
+
+    Please follow good coding practices, include clear commit messages, and test your changes thoroughly.
+    """)
+
+    st.subheader("Maintainer")
+    st.write("*   [34rthsh4p3r](https://github.com/34rthsh4p3r)")
+
+    st.subheader("Acknowledgments")
+    st.write("This project was developed with significant assistance from Google AI Studio (Gemini 2.0 Pro Experimental 02-05) on Visual Studio Code.")
+
+    st.subheader("License")
+    st.write("This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.")
+
 
 
 def editor_page():
