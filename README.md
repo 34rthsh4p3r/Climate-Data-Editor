@@ -30,7 +30,7 @@ This Streamlit application, **Climate Data Editor (CDE)**, is designed to simpli
 *   **Error Handling:** Shows errors if there are problems with the file or data.
 *   **Copy-Paste Output:** The generated R code is displayed in a code block, ready to be copied.
 *   **Multi-Page App:**  The app is organized into multiple pages:
-    *   **EDITOR:**  The main page for uploading data and generating the R code.
+    *   **Editor:**  The main page for uploading data and generating the R code.
     *   **Usage:** Provides detailed instructions on how to use the app and the required input data formats.
     *   **Data Source:**  Information about the Hungarian Meteorological Service data source.
     *   **About:**  Information about contributing, maintainer, acknowledgments, and license.
@@ -127,7 +127,7 @@ This format is specifically designed for data from the Hungarian Meteorological 
 
 ## Usage
 
-1.  **Go to the EDITOR Page:** Use the navigation at the top of the app to select the "EDITOR" page.
+1.  **Go to the Editor Page:** Use the navigation at the top of the app to select the "Editor" page.
 2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
 3.  **Enter Station Information:** Enter the station name and elevation (in meters) in the provided text boxes.
 4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
