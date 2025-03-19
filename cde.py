@@ -14,7 +14,7 @@ def editor_page():
     """)
 
     st.header("Upload Climate Data")
-    st.write("Excel data should have these specific columns: Rain, Tavg, Tmin, Tmax, and either separate Year and Month columns OR a combined YearMonth column (e.g., 202301 for January 2023). Only full years with no missing data should be added.")
+    st.write("Excel data should have these specific columns: Rain, Tavg, Tmin, Tmax, and either separate Year and Month columns OR a combined Time column (e.g., 202301 for January 2023). Only full years with no missing data should be added.")
 
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
@@ -43,20 +43,20 @@ def editor_page():
                     st.error("Error: 'Month' values must be between 1 and 12.")
                     return
 
-            elif 'YearMonth' in df.columns:
-                # Combined YearMonth column
-                df['YearMonth'] = pd.to_numeric(df['YearMonth'], errors='coerce')
-                df.dropna(subset=['YearMonth'], inplace=True)
-                df['YearMonth'] = df['YearMonth'].astype(int)  # Ensure it's an integer
-                df['Year'] = df['YearMonth'] // 100  # Integer division to get the year
-                df['Month'] = df['YearMonth'] % 100  # Modulo to get the month
+            elif 'Time' in df.columns:
+                # Combined Time column
+                df['Time'] = pd.to_numeric(df['Time'], errors='coerce')
+                df.dropna(subset=['Time'], inplace=True)
+                df['Time'] = df['Time'].astype(int)  # Ensure it's an integer
+                df['Year'] = df['Time'] // 100  # Integer division to get the year
+                df['Month'] = df['Time'] % 100  # Modulo to get the month
                 if not df['Month'].between(1, 12).all():
                     st.error("Error: Extracted 'Month' values must be between 1 and 12.")
                     return
-                # Drop the original YearMonth column
-                df.drop(columns=['YearMonth'], inplace=True, errors='ignore')
+                # Drop the original Time column
+                df.drop(columns=['Time'], inplace=True, errors='ignore')
             else:
-                st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns OR a combined 'YearMonth' column.")
+                st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns OR a combined 'Time' column.")
                 return
 
             # Check if all required columns exist
@@ -145,7 +145,7 @@ def usage_page():
 
     OR:
 
-    *   **YearMonth:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
+    *   **Time:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
 
     The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
 
@@ -161,9 +161,9 @@ def usage_page():
     })
     st.dataframe(example_input_separate)
 
-    st.write("**Input Data Example (Combined YearMonth):**")
+    st.write("**Input Data Example (Combined Time):**")
     example_input_combined = pd.DataFrame({
-        'YearMonth': [201401, 201402, 201403, 202412],
+        'Time': [201401, 201402, 201403, 202412],
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tavg': [2.7, 3.9, 9.3, 2.2],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
