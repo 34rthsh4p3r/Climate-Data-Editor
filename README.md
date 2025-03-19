@@ -116,7 +116,12 @@ Please follow good coding practices, include clear commit messages, and test you
 
 ## Acknowledgments
 
-This project was developed with significant assistance from Google AI Studio (Gemini 2.0 Pro Experimental 02-05) on PyCharm and Visual Studio Code.
+This project was developed with significant assistance from Google AI Studio (Gemini 2.0 Pro Experimental 02-05) on Visual Studio Code.
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](documents/LICENSE) file for details.
+
 
 ---
 
