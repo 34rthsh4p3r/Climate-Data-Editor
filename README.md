@@ -48,7 +48,7 @@ The data should be continuous; no missing values or incomplete years are allowed
         | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
         | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
         | ...  | ...   | ...  | ...  | ...   | ...   |
-        | 2014 | 10     | 67.9  | 12.1 | -2.7   | 27.2  |
+        | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
         
     * **Output Data Example**
 
@@ -57,14 +57,14 @@ The data should be continuous; no missing values or incomplete years are allowed
      | 2     | 3         | 27.2636  | 25.1      | -15.7    |
      | 3     | 4         | 30.4455  | 30.8      | -1.3091  |
      | ...   | ...       | ...      | ...       | ...      |
-     |11     | 12     | 46.6364     |  17.8  | -6.9091      | -12.2|
+     |12     | 46.6364   | 17.8     | -6.9091   | -12.2    |
      
      Absolute minimum temperature (°C): -18.6
      Absolute maximum temperature (°C): 40.3
      
 
-4.  **Copy R Code:**  The generated R code will appear in a code block.  Copy this code.
-5.  **Run in R/RStudio:**  Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram.  Make sure you have the `climatol` package installed (`install.packages("climatol")`).
+5.  **Copy R Code:**  The generated R code will appear in a code block.  Copy this code.
+6.  **Run in R/RStudio:**  Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram.  Make sure you have the `climatol` package installed (`install.packages("climatol")`).
 
 ## Example R Output
 
