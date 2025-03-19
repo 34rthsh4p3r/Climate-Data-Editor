@@ -98,6 +98,32 @@ The column names must be *exactly* as listed above, including capitalization. Th
 5.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it.  This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
 
 ---
+## Example R Output
+```R
+library(climatol)
+
+precipitation <- c(39.1, 32.8, 36.2, 38.4, 50.0, 48.7, 57.9, 54.5, 46.1, 49.3, 42.8, 46.6)
+mean_monthly_tmax <- c(13.8, 21.0, 24.3, 29.8, 34.7, 38.1, 40.3, 39.7, 34.6, 28.8, 21.5, 17.8)
+mean_monthly_tmin <- c(-12.0, -7.6, -4.2, 2.1, 8.5, 13.3, 15.5, 14.6, 9.1, 3.4, -2.3, -6.9)
+absolute_monthly_min_t <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
+
+data.matrix <- rbind(
+  precipitation,
+  mean_monthly_tmax,
+  mean_monthly_tmin,
+  absolute_monthly_min_t)
+
+diagwl(data.matrix,
+        est="Pocsaj",
+        cols=NULL,
+        alt="97",
+        per="1991-2020", # Add the period. Very important for climatol
+        mlab="en")
+```
+
+---
+
+
 ## Contributing
 
 Contributions are welcome!  If you'd like to contribute:
@@ -122,29 +148,4 @@ This project was developed with significant assistance from Google AI Studio (Ge
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](documents/LICENSE) file for details.
 
-
----
-
-## Example R Output
-
-```R
-library(climatol)
-
-precipitation <- c(39.1, 32.8, 36.2, 38.4, 50.0, 48.7, 57.9, 54.5, 46.1, 49.3, 42.8, 46.6)
-mean_monthly_tmax <- c(13.8, 21.0, 24.3, 29.8, 34.7, 38.1, 40.3, 39.7, 34.6, 28.8, 21.5, 17.8)
-mean_monthly_tmin <- c(-12.0, -7.6, -4.2, 2.1, 8.5, 13.3, 15.5, 14.6, 9.1, 3.4, -2.3, -6.9)
-absolute_monthly_min_t <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
-
-data.matrix <- rbind(
-  precipitation,
-  mean_monthly_tmax,
-  mean_monthly_tmin,
-  absolute_monthly_min_t)
-
-diagwl(data.matrix,
-        est="Pocsaj",
-        cols=NULL,
-        alt="97",
-        per="1991-2020", # Add the period. Very important for climatol
-        mlab="en")
 
