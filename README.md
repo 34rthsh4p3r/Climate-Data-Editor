@@ -4,11 +4,11 @@ This Streamlit application, **Climate Data Editor (CDE)**, is designed to simpli
 
 **Streamlit App:** [https://cdeditor.streamlit.app/](https://cdeditor.streamlit.app/)
    
-   *   The app is organized into multiple pages:
-      *   **Editor:**  The main page for uploading data and generating the R code.
-      *   **Usage:** Provides detailed instructions on how to use the app and the required input data formats.
-      *   **Data Source:**  Information about the Hungarian Meteorological Service data source.
-      *   **About:**  Information about contributing, maintainer, acknowledgments, and license.
+*   The app is organized into multiple pages:
+   *   **Editor:**  The main page for uploading data and generating the R code.
+   *   **Usage:** Provides detailed instructions on how to use the app and the required input data formats.
+   *   **Data Source:**  Information about the Hungarian Meteorological Service data source.
+   *   **About:**  Information about contributing, maintainer, acknowledgments, and license.
 ---
 
 ## Features
