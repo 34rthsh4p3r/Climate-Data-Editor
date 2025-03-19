@@ -5,6 +5,7 @@ import io
 # Set page configuration - this needs to be the FIRST Streamlit command
 st.set_page_config(page_title="Climate Data Editor", layout="wide")
 
+# --- Functions for Each Page ---
 
 def home_page():
     st.title("Climate Data Editor (CDE) for Walter-Lieth Diagrams")
@@ -12,6 +13,7 @@ def home_page():
     This application helps you prepare climate data for creating Walter-Lieth diagrams using the `climatol` package in R.  It takes monthly climate data, validates it, performs calculations, and generates the R code needed for the `diagwl` function.
     """)
 
+    # ... (rest of the home_page content from previous responses) ...
     st.subheader("Input Data Format")
     st.write("""
     The input Excel file (`.xlsx`) must have the following columns, *exactly* as named (case-sensitive):
@@ -42,7 +44,7 @@ def home_page():
 
     st.subheader("Usage")
     st.write("""
-    1.  **Go to EDITOR Page:** Use the navigation on the left to change to the editor.
+    1.  **Go to EDITOR Page:** Use the navigation on the top to change to the editor.
     2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
     3.  **Enter Station Information:** Type the station name and elevation (in meters) in the provided text boxes.
     4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'.  The calculated monthly averages will be displayed in a table labeled 'Output Data'.  Check for any errors.
@@ -136,8 +138,6 @@ def home_page():
     st.subheader("License")
     st.write("This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.")
 
-
-
 def editor_page():
     # --- File Upload and Data Validation ---
     st.header("Upload Climate Data")
@@ -146,7 +146,7 @@ def editor_page():
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
     # --- Station Information Input (Side-by-Side) ---
-    col1, col2 = st.columns(2)  # Create two columns
+    col1, col2 = st.columns(2)
     with col1:
         station_name = st.text_input("Enter Station Name:", value="StationName")
     with col2:
@@ -156,78 +156,113 @@ def editor_page():
     if uploaded_file is not None:
         try:
             df = pd.read_excel(uploaded_file)
-            # --- Data Validation ---
+            # Data Validation
             required_columns = ["Year", "Month", "Rain", "Tavg", "Tmin", "Tmax"]
             if not all(col in df.columns for col in required_columns):
                 st.error(f"Error: The Excel file must contain the following columns: {', '.join(required_columns)}")
-            else:
-                st.header("Input Data")
-                st.dataframe(df)
+                return  # Stop processing if validation fails
 
-                # --- Data Processing ---
-                monthly_avg = df.groupby('Month').agg({
-                    'Rain': 'mean',
-                    'Tmax': 'mean',
-                    'Tmin': ['mean', 'min'],
-                    'Tmax': 'max'
-                })
-                # Flatten the MultiIndex columns *correctly*
-                monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
-                monthly_avg = monthly_avg.reset_index()
+            # Check for complete years and no missing values
+            df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+            df['Month'] = pd.to_numeric(df['Month'], errors='coerce')
+            # Drop rows where Year or Month are NaN *before* grouping
+            df.dropna(subset=['Year', 'Month'], inplace=True)
 
-                Absolute_Tmin = df['Tmin'].min()
-                Absolute_Tmax = df['Tmax'].max()
+            # Convert Year and Month to integers after removing NaNs
+            df['Year'] = df['Year'].astype(int)
+            df['Month'] = df['Month'].astype(int)
 
-                mean_year_temp = df['Tavg'].mean()
-                sum_year_precipitation = df['Rain'].sum()
+            # Check for Month values within the range 1-12
+            if not df['Month'].between(1, 12).all():
+                st.error("Error: 'Month' values must be between 1 and 12.")
+                return
 
-                st.header("Output Data")
-                st.dataframe(monthly_avg)
-                st.write(f"Absolute minimum temperature (°C): {Absolute_Tmin:.1f}")
-                st.write(f"Absolute maximum temperature (°C): {Absolute_Tmax:.1f}")
+            # Check for missing values in the required columns. Check this after
+            # dropping rows
+            if df[required_columns].isnull().values.any():
+                st.error("Error: Missing values found in the required columns.")
+                return  # Exit if missing values are found
 
-                # --- Climatol Output ---
-                st.header("Output text for climatol/diagwl")
+            # Group by year and check if each year has 12 months
+            year_counts = df.groupby('Year')['Month'].count()
+            incomplete_years = year_counts[year_counts != 12].index.tolist()
+            if incomplete_years:
+                st.error(f"Error: Incomplete data for year(s): {', '.join(map(str, incomplete_years))}.  Each year must have data for all 12 months.")
+                return # Exit if there are incomplete years
 
-                # Prepare data for climatol
-                rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
-                tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
-                tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
-                tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
+            st.header("Input Data")
+            st.dataframe(df)
 
+            # --- Data Processing ---
+            monthly_avg = df.groupby('Month').agg({
+                'Rain': 'mean',
+                'Tmax': 'mean',
+                'Tmin': ['mean', 'min'],
+                'Tmax': 'max'
+            })
+            monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
+            monthly_avg = monthly_avg.reset_index()
 
-                # Create the R code string
-                output_buffer = io.StringIO()
-                output_buffer.write("library(climatol)\n\n")
-                output_buffer.write(f"precipitation <- c({rain_str})\n")
-                output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
-                output_buffer.write(f"mean_monthly_tmin <- c({tmin_mean_str})\n")
-                output_buffer.write(f"absolute_monthly_min_t <- c({tmin_abs_str})\n\n")
-                output_buffer.write("data.matrix <- rbind(\n")
-                output_buffer.write("  precipitation,\n")
-                output_buffer.write("  mean_monthly_tmax,\n")
-                output_buffer.write("  mean_monthly_tmin,\n")
-                output_buffer.write("  absolute_monthly_min_t)\n\n")
-                output_buffer.write(f'diagwl(data.matrix,\n')
-                output_buffer.write(f'       est="{station_name}",\n')
-                output_buffer.write(f'       cols=NULL,\n')
-                output_buffer.write(f'       alt="{elevation}",\n')
-                output_buffer.write(f'       mlab="en")\n')
+            Absolute_Tmin = df['Tmin'].min()
+            Absolute_Tmax = df['Tmax'].max()
 
-                # Display the code and allow copying
-                st.code(output_buffer.getvalue(), language="r")
-                output_buffer.close()
+            st.header("Output Data")
+            st.dataframe(monthly_avg)
+            st.write(f"Absolute minimum temperature (°C): {Absolute_Tmin:.1f}")
+            st.write(f"Absolute maximum temperature (°C): {Absolute_Tmax:.1f}")
+
+            # --- Climatol Output ---
+            st.header("Output text for climatol/diagwl")
+
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
+
+            output_buffer = io.StringIO()
+            output_buffer.write("library(climatol)\n\n")
+            output_buffer.write(f"precipitation <- c({rain_str})\n")
+            output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
+            output_buffer.write(f"mean_monthly_tmin <- c({tmin_mean_str})\n")
+            output_buffer.write(f"absolute_monthly_min_t <- c({tmin_abs_str})\n\n")
+            output_buffer.write("data.matrix <- rbind(\n")
+            output_buffer.write("  precipitation,\n")
+            output_buffer.write("  mean_monthly_tmax,\n")
+            output_buffer.write("  mean_monthly_tmin,\n")
+            output_buffer.write("  absolute_monthly_min_t)\n\n")
+            output_buffer.write(f'diagwl(data.matrix,\n')
+            output_buffer.write(f'       est="{station_name}",\n')
+            output_buffer.write(f'       cols=NULL,\n')
+            output_buffer.write(f'       alt="{elevation}",\n')
+            output_buffer.write(f'       mlab="en")\n')
+
+            st.code(output_buffer.getvalue(), language="r")
+            output_buffer.close()
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
+# --- Main App Logic with Top Navigation ---
 
-# --- Sidebar Navigation ---
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ("HOME", "EDITOR"))
+# Initialize session state for page navigation
+if 'current_page' not in st.session_state:
+    st.session_state['current_page'] = 'HOME'
 
-# --- Page Display ---
-if page == "HOME":
+# Create buttons for navigation
+col1, col2, col3 = st.columns(3)  # Adjust column count as needed
+
+with col1:
+    if st.button('HOME'):
+        st.session_state['current_page'] = 'HOME'
+with col2:
+    if st.button('EDITOR'):
+        st.session_state['current_page'] = 'EDITOR'
+# Add more buttons in other columns as needed
+
+
+# Display the selected page
+if st.session_state['current_page'] == 'HOME':
     home_page()
-elif page == "EDITOR":
+elif st.session_state['current_page'] == 'EDITOR':
     editor_page()
+# Add more page conditions as needed
