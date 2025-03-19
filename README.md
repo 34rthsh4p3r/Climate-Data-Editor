@@ -6,26 +6,6 @@ This Streamlit application, **Climate Data Editor (CDE)**, is designed to simpli
 
 ---
 
-## Data Source (Hungarian Meteorological Service)
-
-This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
-
-Data Access: [Monthly climate data for Hungarian stations](https://odp.met.hu/climate/observations_hungary/monthly/historical/)
-
-Station Metadata: [Station metadata](https://odp.met.hu/climate/observations_hungary/monthly/station_meta_auto.csv)
-
-Data Usage Terms: Using climate data from the Hungarian Meteorological Service is bound to general terms and conditions of use. Key points from these terms include:
-
-*   Data from HungaroMet is freely available.
-*   Citation is required: When using data, you must cite the source. The recommended citation is:
-    *   Text: Source: Hungarian Meteorological Service
-    *   Graphically: Use the HungaroMet logo.
-*   If you substantially transform or process the data, you should mention this in a central reference list or imprint.
-*   If the data is used inappropriately, the source references shall be deleted.
-*   To ask questions or provide feedback on the Meteorological Database, contact: [odp@met.hu](mailto:odp@met.hu)
-
----
-
 ## Features
 
 *   **Data Upload:** Upload your climate data in Excel format (`.xlsx`).
@@ -49,6 +29,26 @@ Data Usage Terms: Using climate data from the Hungarian Meteorological Service i
 * **Data Preview:** Displays both input dataframe ("Input Data") and output dataframe ("Output Data") (monthly average).
 * **Error Handling**: Shows errors if there are problems with the file or data.
 * **Copy-Paste Output:** The generated R code is displayed in a code block, ready to be copied and pasted directly into RStudio.
+
+---
+
+## Data Source (Hungarian Meteorological Service)
+
+This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
+
+Data Access: [Monthly climate data for Hungarian stations](https://odp.met.hu/climate/observations_hungary/monthly/historical/)
+
+Station Metadata: [Station metadata](https://odp.met.hu/climate/observations_hungary/monthly/station_meta_auto.csv)
+
+Data Usage Terms: Using climate data from the Hungarian Meteorological Service is bound to general terms and conditions of use. Key points from these terms include:
+
+*   Data from HungaroMet is freely available.
+*   Citation is required: When using data, you must cite the source. The recommended citation is:
+    *   Text: Source: Hungarian Meteorological Service
+    *   Graphically: Use the HungaroMet logo.
+*   If you substantially transform or process the data, you should mention this in a central reference list or imprint.
+*   If the data is used inappropriately, the source references shall be deleted.
+*   To ask questions or provide feedback on the Meteorological Database, contact: [odp@met.hu](mailto:odp@met.hu)
 
 ---
 
