@@ -6,7 +6,6 @@ import io
 st.set_page_config(page_title="Climate Data Editor", layout="wide")
 
 # --- Page Functions ---
-# Use consistent 4-space indentation
 
 def editor_page():
     st.title("Climate Data Editor (CDE) for Walter-Lieth Diagrams")
@@ -15,7 +14,7 @@ def editor_page():
     """)
 
     st.header("Upload Climate Data")
-    st.write("Excel data should have these specific columns: Year, Month, Rain, Tavg, Tmin, Tmax. Only full years with no missing data should be added.")
+    st.write("Excel data should have these specific columns: Rain, Tavg, Tmin, Tmax, and either separate Year and Month columns OR a combined YearMonth column (e.g., 202301 for January 2023). Only full years with no missing data should be added.")
 
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
@@ -28,25 +27,49 @@ def editor_page():
     if uploaded_file is not None:
         try:
             df = pd.read_excel(uploaded_file)
-            required_columns = ["Year", "Month", "Rain", "Tavg", "Tmin", "Tmax"]
-            if not all(col in df.columns for col in required_columns):
-                st.error(f"Error: The Excel file must contain the following columns: {', '.join(required_columns)}")
-                return  # Crucial: Stop execution if validation fails
 
-            df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
-            df['Month'] = pd.to_numeric(df['Month'], errors='coerce')
-            df.dropna(subset=['Year', 'Month'], inplace=True)
-            df['Year'] = df['Year'].astype(int)
-            df['Month'] = df['Month'].astype(int)
+            # --- Data Validation and Preprocessing ---
+            required_columns = ["Rain", "Tavg", "Tmin", "Tmax"]  # Columns that MUST exist
 
-            if not df['Month'].between(1, 12).all():
-                st.error("Error: 'Month' values must be between 1 and 12.")
+            # Check for Year and Month columns (either separate or combined)
+            if 'Year' in df.columns and 'Month' in df.columns:
+                # Separate Year and Month columns
+                df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+                df['Month'] = pd.to_numeric(df['Month'], errors='coerce')
+                df.dropna(subset=['Year', 'Month'], inplace=True)
+                df['Year'] = df['Year'].astype(int)
+                df['Month'] = df['Month'].astype(int)
+                if not df['Month'].between(1, 12).all():
+                    st.error("Error: 'Month' values must be between 1 and 12.")
+                    return
+
+            elif 'YearMonth' in df.columns:
+                # Combined YearMonth column
+                df['YearMonth'] = pd.to_numeric(df['YearMonth'], errors='coerce')
+                df.dropna(subset=['YearMonth'], inplace=True)
+                df['YearMonth'] = df['YearMonth'].astype(int)  # Ensure it's an integer
+                df['Year'] = df['YearMonth'] // 100  # Integer division to get the year
+                df['Month'] = df['YearMonth'] % 100  # Modulo to get the month
+                if not df['Month'].between(1, 12).all():
+                    st.error("Error: Extracted 'Month' values must be between 1 and 12.")
+                    return
+                # Drop the original YearMonth column
+                df.drop(columns=['YearMonth'], inplace=True, errors='ignore')
+            else:
+                st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns OR a combined 'YearMonth' column.")
                 return
 
-            if df[required_columns].isnull().any().any():  # More concise missing value check
+            # Check if all required columns exist
+            if not all(col in df.columns for col in required_columns):
+                st.error(f"Error: The Excel file must also contain the following columns: {', '.join(required_columns)}")
+                return
+
+             # Check for missing values in ALL required columns (including Year/Month)
+            if df[required_columns + ['Year', 'Month']].isnull().any().any():
                 st.error("Error: Missing values found in the required columns.")
                 return
 
+            # Group by year and check if each year has 12 months
             year_counts = df.groupby('Year')['Month'].count()
             incomplete_years = year_counts[year_counts != 12].index.tolist()
             if incomplete_years:
@@ -56,9 +79,10 @@ def editor_page():
             st.header("Input Data")
             st.dataframe(df)
 
+            # --- Data Processing ---
             monthly_avg = df.groupby('Month').agg({
                 'Rain': 'mean',
-                'Tmax': 'max',  # Keep Tmax aggregation consistent
+                'Tmax': 'max',
                 'Tmin': ['mean', 'min'],
             })
             monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
@@ -72,6 +96,7 @@ def editor_page():
             st.write(f"Absolute minimum temperature (°C): {Absolute_Tmin:.1f}")
             st.write(f"Absolute maximum temperature (°C): {Absolute_Tmax:.1f}")
 
+            # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
 
             rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
@@ -79,7 +104,7 @@ def editor_page():
             tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
             tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
 
-            output_buffer = io.StringIO()  # More efficient string building
+            output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
             output_buffer.write(f"precipitation <- c({rain_str})\n")
             output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
@@ -89,12 +114,12 @@ def editor_page():
             output_buffer.write("  precipitation,\n")
             output_buffer.write("  mean_monthly_tmax,\n")
             output_buffer.write("  mean_monthly_tmin,\n")
-            output_buffer.write("  absolute_monthly_min_t)\n\n")  # Corrected indentation
+            output_buffer.write("  absolute_monthly_min_t)\n\n")
             output_buffer.write(f'diagwl(data.matrix,\n')
             output_buffer.write(f'       est="{station_name}",\n')
             output_buffer.write(f'       cols=NULL,\n')
             output_buffer.write(f'       alt="{elevation}",\n')
-            output_buffer.write(f'       mlab="en")\n')  # Corrected indentation
+            output_buffer.write(f'       mlab="en")\n')
 
             st.code(output_buffer.getvalue(), language="r")
 
@@ -108,18 +133,25 @@ def usage_page():
     st.write("""
     The input Excel file (`.xlsx`) must have the following columns, *exactly* as named (case-sensitive):
 
-    *   **Year:** The year of the observation.
-    *   **Month:** The month of the observation (1-12).
     *   **Rain:** Monthly precipitation in mm.
     *   **Tavg:** Average monthly temperature in °C.
     *   **Tmin:** Minimum monthly temperature in °C.
     *   **Tmax:** Maximum monthly temperature in °C.
 
-    The data should represent a single, continuous time series for one station.  The tool will treat the entire uploaded dataset as belonging to a single location.
+    AND EITHER:
 
-    **Input Data Example:**
+    *   **Year:** The year of the observation.
+    *   **Month:** The month of the observation (1-12).
+
+    OR:
+
+    *   **YearMonth:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
+
+    The data should represent a single, continuous time series for one station. The tool will treat the entire uploaded dataset as belonging to a single location.
+
+    **Input Data Example (Separate Year/Month):**
     """)
-    example_input = pd.DataFrame({
+    example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
         'Rain': [36.9, 21.7, 11.6, 14.9],
@@ -127,7 +159,18 @@ def usage_page():
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
-    st.dataframe(example_input)
+    st.dataframe(example_input_separate)
+
+    st.write("**Input Data Example (Combined YearMonth):**")
+    example_input_combined = pd.DataFrame({
+        'YearMonth': [201401, 201402, 201403, 202412],
+        'Rain': [36.9, 21.7, 11.6, 14.9],
+        'Tavg': [2.7, 3.9, 9.3, 2.2],
+        'Tmin': [-7.4, -13.5, -2.5, -3.5],
+        'Tmax': [13.8, 15.7, 23.1, 11.2]
+    })
+    st.dataframe(example_input_combined)
+
 
     st.subheader("Usage")
     st.write("""
@@ -232,7 +275,7 @@ def about_page():
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'EDITOR'  # Start on the EDITOR page
 
-# Navigation buttons - use consistent 4-space indentation
+# Navigation buttons
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     if st.button('EDITOR'):
@@ -247,7 +290,7 @@ with col4:
     if st.button('About'):
         st.session_state['current_page'] = 'About'
 
-# Page display - use consistent 4-space indentation
+# Page display
 if st.session_state['current_page'] == 'EDITOR':
     editor_page()
 elif st.session_state['current_page'] == 'Usage':
