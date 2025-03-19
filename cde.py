@@ -312,7 +312,7 @@ def data_source_page():
     """)
 
 def about_page():
-    st.subheader("Contributing")
+    st.header("Contributing")
     st.write("""
     Contributions are welcome! If you'd like to contribute:
 
@@ -325,13 +325,13 @@ def about_page():
     Please follow good coding practices, include clear commit messages, and test your changes thoroughly.
     """)
 
-    st.subheader("Maintainer")
+    st.header("Maintainer")
     st.write("*   [34rthsh4p3r](https://github.com/34rthsh4p3r)")
 
-    st.subheader("Acknowledgments")
+    st.header("Acknowledgments")
     st.write("This project was developed with significant assistance from Google AI Studio (Gemini 2.0 Pro Experimental 02-05) on Visual Studio Code.")
 
-    st.subheader("License")
+    st.header("License")
     st.write("This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.")
 
 # --- Main App Logic with Top Navigation ---
