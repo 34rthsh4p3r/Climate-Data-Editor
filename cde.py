@@ -235,7 +235,7 @@ def usage_page():
 
     st.dataframe(example_input_hms)
 
-    st.subheader("Usage")
+    st.header("Usage")
     st.write("""
     1.  **Go to Editor Page:** Use the navigation on the top to go to the Editor.
     2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
@@ -245,7 +245,7 @@ def usage_page():
     6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
     """)
 
-    st.subheader("Output Data Example")
+    st.header("Output Data Example")
     st.write("""
     The Output data frame that's calculated consists of:
 
@@ -265,7 +265,7 @@ def usage_page():
     st.write("Absolute minimum temperature (°C): -18.6")
     st.write("Absolute maximum temperature (°C): 40.3")
 
-    st.subheader("Example of generated R code")
+    st.header("Example of generated R code")
     st.code("""
     library(climatol)
 
