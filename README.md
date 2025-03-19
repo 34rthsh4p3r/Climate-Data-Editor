@@ -74,12 +74,14 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 
 **Example (Separate Year/Month):**
 
-Year	Month	Rain	Tavg	Tmin	Tmax
-2014	1	36.9	2.7	-7.4	13.8
-2014	2	21.7	3.9	-13.5	15.7
-2014	3	11.6	9.3	-2.5	23.1
-...	...	...	...	...	...
-2024	12	14.9	2.2	-3.5	11.2
+   | Year | Month | Rain | Tavg | Tmin  | Tmax  |
+   |------|-------|------|------|-------|-------|
+   | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
+   | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
+   | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
+   | ...  | ...   | ...  | ...  | ...   | ...   |
+   | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
+
 
 **Format 2: Combined YearMonth or Time Column**
 
@@ -93,12 +95,13 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 
 **Example (Combined YearMonth/Time):**
 
-Time	Rain	Tavg	Tmin	Tmax
-201401	36.9	2.7	-7.4	13.8
-201402	21.7	3.9	-13.5	15.7
-201403	11.6	9.3	-2.5	23.1
-...	...	...	...	...
-202412	14.9	2.2	-3.5	11.2
+   | Time   | Rain | Tavg | Tmin  | Tmax  |
+   |--------|------|------|-------|-------|
+   | 201401 | 36.9 | 2.7  | -7.4  | 13.8  |
+   | 201402 | 21.7 | 3.9  | -13.5 | 15.7  |
+   | 201403 | 11.6 | 9.3  | -2.5  | 23.1  |
+   |  ...   | ...  | ...  | ...   | ...   |
+   | 202412 | 14.9 | 2.2  | -3.5  | 11.2  |
 
 **Format 3: Hungarian Meteorological Service Data**
 
@@ -112,12 +115,13 @@ This format is specifically designed for data from the Hungarian Meteorological 
 
 **Example (Hungarian Meteorological Service):**
 
-Time	rau	t	tn	tx
-201401	36.9	2.7	-7.4	13.8
-201402	21.7	3.9	-13.5	15.7
-201403	11.6	9.3	-2.5	23.1
-...	...	...	...	...
-202412	14.9	2.2	-3.5	11.2
+   | Time   |  rau |   t  |   tn  |   tx  |
+   |--------|------|------|-------|-------|
+   | 201401 | 36.9 | 2.7  | -7.4  | 13.8  |
+   | 201402 | 21.7 | 3.9  | -13.5 | 15.7  |
+   | 201403 | 11.6 | 9.3  | -2.5  | 23.1  |
+   |  ...   | ...  | ...  | ...   | ...   |
+   | 202412 | 14.9 | 2.2  | -3.5  | 11.2  |
 
 ---
 
