@@ -7,7 +7,7 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 
 # --- Page Functions ---
 
-def editor_page():
+def Editor_page():
     st.title("Climate Data Editor (CDE) for Walter-Lieth Diagrams")
     st.write("""
     This application helps you prepare climate data for creating Walter-Lieth diagrams using the `climatol` package in R. It takes monthly climate data, validates it, performs calculations, and generates the R code needed for the `diagwl` function.
@@ -242,7 +242,7 @@ def usage_page():
 
     st.subheader("Usage")
     st.write("""
-    1.  **Go to EDITOR Page:** Use the navigation on the top to go to the editor.
+    1.  **Go to Editor Page:** Use the navigation on the top to go to the Editor.
     2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
     3.  **Enter Station Information:**  Enter the station name and elevation in the provided text boxes.
     4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
@@ -289,7 +289,6 @@ def usage_page():
             est="Pocsaj",
             cols=NULL,
             alt="97",
-            per="1991-2020", # Add the period. Very important for climatol
             mlab="en")
     """, language='r')
 
@@ -341,13 +340,13 @@ def about_page():
 
 # Initialize session state
 if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'EDITOR'  # Start on the EDITOR page
+    st.session_state['current_page'] = 'Editor'  # Start on the Editor page
 
 # Navigation buttons
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    if st.button('EDITOR'):
-        st.session_state['current_page'] = 'EDITOR'
+    if st.button('Editor'):
+        st.session_state['current_page'] = 'Editor'
 with col2:
     if st.button('Usage'):
         st.session_state['current_page'] = 'Usage'
@@ -359,8 +358,8 @@ with col4:
         st.session_state['current_page'] = 'About'
 
 # Page display
-if st.session_state['current_page'] == 'EDITOR':
-    editor_page()
+if st.session_state['current_page'] == 'Editor':
+    Editor_page()
 elif st.session_state['current_page'] == 'Usage':
     usage_page()
 elif st.session_state['current_page'] == 'Data Source':
