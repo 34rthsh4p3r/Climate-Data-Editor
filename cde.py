@@ -18,7 +18,7 @@ def editor_page():
     Excel data can be in one of three formats:
 
     **Format 1:** Separate Year and Month columns, along with Rain, Tavg, Tmin, and Tmax.
-    **Format 2:** A combined YearMonth column (e.g., 202301 for January 2023), along with Rain, Tavg, Tmin, and Tmax.
+    **Format 2:** A combined YearMonth **or Time** column (e.g., 202301 for January 2023), along with Rain, Tavg, Tmin, and Tmax.
     **Format 3:** Data from the Hungarian Meteorological Service, with columns 'Time' (YYYYMM), 'rau' (Rain), 't' (Tavg), 'tn' (Tmin), and 'tx' (Tmax).
 
     Only full years with no missing data in the required columns will be processed.
@@ -45,7 +45,7 @@ def editor_page():
                 st.write("Detected Hungarian Meteorological Service data format.")
                 # Rename columns to standard names
                 df.rename(columns={
-                    'Time': 'YearMonth',
+                    'Time': 'YearMonth',  # Keep 'Time' renamed to YearMonth for consistency
                     'rau': 'Rain',
                     't': 'Tavg',
                     'tn': 'Tmin',
@@ -79,20 +79,22 @@ def editor_page():
                     if not df['Month'].between(1, 12).all():
                         st.error("Error: 'Month' values must be between 1 and 12.")
                         return
-                    required_columns.extend(['Year', 'Month']) # Add to required_columns
+                    required_columns.extend(['Year', 'Month'])
 
-                elif 'YearMonth' in df.columns:
-                    st.write("Detected combined YearMonth column.")
-                    df['YearMonth'] = pd.to_numeric(df['YearMonth'], errors='coerce')
-                    df.dropna(subset=['YearMonth'], inplace=True)
-                    df['YearMonth'] = df['YearMonth'].astype(int)
-                    df['Year'] = df['YearMonth'] // 100
-                    df['Month'] = df['YearMonth'] % 100
-                    df.drop(columns=['YearMonth'], inplace=True)
+                elif 'YearMonth' in df.columns or 'Time' in df.columns:  # Check for YearMonth OR Time
+                    st.write("Detected combined YearMonth or Time column.")
+                    year_month_col = 'YearMonth' if 'YearMonth' in df.columns else 'Time'  # Determine which column exists
+
+                    df[year_month_col] = pd.to_numeric(df[year_month_col], errors='coerce')
+                    df.dropna(subset=[year_month_col], inplace=True)
+                    df[year_month_col] = df[year_month_col].astype(int)
+                    df['Year'] = df[year_month_col] // 100
+                    df['Month'] = df[year_month_col] % 100
+                    df.drop(columns=[year_month_col], inplace=True)  # Drop the original column
                     if not df['Month'].between(1, 12).all():
                         st.error("Error: Extracted 'Month' values must be between 1 and 12.")
                         return
-                    required_columns.extend(['Year', 'Month'])  # Add to required
+                    required_columns.extend(['Year', 'Month'])
 
                 else:
                     st.error("Error: The Excel file must contain either separate 'Year' and 'Month' columns, a combined 'YearMonth' column, OR be in the Hungarian Meteorological Service format.")
@@ -198,24 +200,25 @@ def usage_page():
     })
     st.dataframe(example_input_separate)
 
-    st.write("**Format 2: Combined YearMonth Column**")
+    st.write("**Format 2: Combined YearMonth or Time Column**")
     st.write("""
-    *   **YearMonth:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
+    *   **YearMonth** or **Time**:  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
     *   **Rain:** Monthly precipitation in mm.
     *   **Tavg:** Average monthly temperature in °C.
     *   **Tmin:** Minimum monthly temperature in °C.
     *   **Tmax:** Maximum monthly temperature in °C.
     """)
 
-    st.write("**Example (Combined YearMonth):**")
+    st.write("**Example (Combined YearMonth/Time):**")
     example_input_combined = pd.DataFrame({
-        'YearMonth': [201401, 201402, 201403, 202412],
+        'Time': [201401, 201402, 201403, 202412],  # Use 'Time' here
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tavg': [2.7, 3.9, 9.3, 2.2],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_combined)
+
 
     st.write("**Format 3: Hungarian Meteorological Service Data**")
     st.write("""
