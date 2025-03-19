@@ -84,7 +84,7 @@ data.matrix <- rbind(
   absolute_monthly_min_t)
 
 diagwl(data.matrix,
-       est="StationName",
+       est="Pocsaj",
        cols=NULL,
-       alt="Altitude",
+       alt="97",
        mlab="en")
