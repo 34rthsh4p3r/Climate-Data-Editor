@@ -7,16 +7,16 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 
 # --- Page Functions ---
 
-def Editor_page():
+def editor_page():
     st.header("Upload Climate Data")
     st.write("""
     Excel data can be in one of three formats:
 
-    **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tavg**, **Tmin**, and **Tmax**.
+    **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tmin**, and **Tmax**.
     
-    **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tavg**, **Tmin**, and **Tmax**.
+    **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tmin**, and **Tmax**.
     
-    **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'t'** (Tavg), **'tn'** (Tmin), and **'tx'** (Tmax).
+    **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'tn'** (Tmin), and **'tx'** (Tmax).
 
     """)
 
@@ -37,13 +37,12 @@ def Editor_page():
             # --- Data Validation and Preprocessing ---
 
             # 1. Check for Hungarian Meteorological Service format
-            if {'Time', 'rau', 't', 'tn', 'tx'}.issubset(df.columns):
+            if {'Time', 'rau', 'tn', 'tx'}.issubset(df.columns):
                 st.write("Detected Hungarian Meteorological Service data format.")
                 # Rename columns to standard names
                 df.rename(columns={
                     'Time': 'YearMonth',  # Keep 'Time' renamed to YearMonth for consistency
                     'rau': 'Rain',
-                    't': 'Tavg',
                     'tn': 'Tmin',
                     'tx': 'Tmax'
                 }, inplace=True)
@@ -60,11 +59,11 @@ def Editor_page():
                 station_name = station_name_input  # Use input values
                 elevation = elevation_input
 
-                required_columns = ["Year", "Month", "Rain", "Tavg", "Tmin", "Tmax"]
+                required_columns = ["Year", "Month", "Rain", "Tmin", "Tmax"]
 
             # 2. Check for standard formats (separate or combined Year/Month)
             else:
-                required_columns = ["Rain", "Tavg", "Tmin", "Tmax"]
+                required_columns = ["Rain", "Tmin", "Tmax"]  # Removed Tavg
                 if 'Year' in df.columns and 'Month' in df.columns:
                     st.write("Detected separate Year and Month columns.")
                     df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
@@ -132,30 +131,37 @@ def Editor_page():
             Absolute_Tmin = df['Tmin'].min()
             Absolute_Tmax = df['Tmax'].max()
 
+             # Calculate yearly average rainfall and overall average
+            yearly_rainfall = df.groupby('Year')['Rain'].sum()
+            average_yearly_rainfall = yearly_rainfall.mean()
+
+
             st.header("Output Data")
             st.dataframe(monthly_avg)
             st.write(f"Absolute minimum temperature (°C): {Absolute_Tmin:.1f}")
             st.write(f"Absolute maximum temperature (°C): {Absolute_Tmax:.1f}")
+            st.write(f"Average rainfall in a year (mm): {average_yearly_rainfall:.2f}")
+
 
             # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
 
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']])
             tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
             tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
             tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
 
             output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
-            output_buffer.write(f"precipitation <- c({rain_str})\n")
-            output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
-            output_buffer.write(f"mean_monthly_tmin <- c({tmin_mean_str})\n")
-            output_buffer.write(f"absolute_monthly_min_t <- c({tmin_abs_str})\n\n")
+            output_buffer.write(f"rain <- c({rain_str})\n")
+            output_buffer.write(f"tmax <- c({tmax_str})\n")
+            output_buffer.write(f"tmin <- c({tmin_mean_str})\n")
+            output_buffer.write(f"tmin_abs <- c({tmin_abs_str})\n\n")
             output_buffer.write("data.matrix <- rbind(\n")
-            output_buffer.write("  precipitation,\n")
-            output_buffer.write("  mean_monthly_tmax,\n")
-            output_buffer.write("  mean_monthly_tmin,\n")
-            output_buffer.write("  absolute_monthly_min_t)\n\n")
+            output_buffer.write("  rain,\n")
+            output_buffer.write("  tmax,\n")
+            output_buffer.write("  tmin,\n")
+            output_buffer.write("  tmin_abs)\n\n")
             output_buffer.write(f'diagwl(data.matrix,\n')
             # Use the values obtained from user input
             output_buffer.write(f'       est="{station_name}",\n')
@@ -170,7 +176,7 @@ def Editor_page():
 
 
 
-def usage_page():
+def data_format_page(): #Renamed function
     st.header("Input Data Format")
     st.write("""
     The input Excel file (`.xlsx`) can be in one of three formats:
@@ -180,7 +186,6 @@ def usage_page():
     *   **Year:** The year of the observation.
     *   **Month:** The month of the observation (1-12).
     *   **Rain:** Monthly precipitation in mm.
-    *   **Tavg:** Average monthly temperature in °C.
     *   **Tmin:** Minimum monthly temperature in °C.
     *   **Tmax:** Maximum monthly temperature in °C.
 
@@ -190,7 +195,6 @@ def usage_page():
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
         'Rain': [36.9, 21.7, 11.6, 14.9],
-        'Tavg': [2.7, 3.9, 9.3, 2.2],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
@@ -200,7 +204,6 @@ def usage_page():
     st.write("""
     *   **YearMonth** or **Time**:  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
     *   **Rain:** Monthly precipitation in mm.
-    *   **Tavg:** Average monthly temperature in °C.
     *   **Tmin:** Minimum monthly temperature in °C.
     *   **Tmax:** Maximum monthly temperature in °C.
     """)
@@ -209,7 +212,6 @@ def usage_page():
     example_input_combined = pd.DataFrame({
         'Time': [201401, 201402, 201403, 202412],  # Use 'Time' here
         'Rain': [36.9, 21.7, 11.6, 14.9],
-        'Tavg': [2.7, 3.9, 9.3, 2.2],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
@@ -220,7 +222,6 @@ def usage_page():
     st.write("""
         *   **Time:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
         *   **rau:** Monthly precipitation in mm.
-        *   **t:** Average monthly temperature in °C.
         *   **tn:** Minimum monthly temperature in °C.
         *   **tx:** Maximum monthly temperature in °C.
         """)
@@ -228,35 +229,25 @@ def usage_page():
     example_input_hms = pd.DataFrame({
     'Time': [201401, 201402, 201403, 202412],
     'rau': [36.9, 21.7, 11.6, 14.9],
-    't': [2.7, 3.9, 9.3, 2.2],
     'tn': [-7.4, -13.5, -2.5, -3.5],
     'tx': [13.8, 15.7, 23.1, 11.2]
     })
 
     st.dataframe(example_input_hms)
 
-    st.header("Usage")
-    st.write("""
-    1.  **Go to Editor Page:** Use the navigation on the top to go to the Editor.
-    2.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
-    3.  **Enter Station Information:**  Enter the station name and elevation in the provided text boxes.
-    4.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
-    5.  **Copy R Code:** The generated R code will appear in a code block. Copy this code.
-    6.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
-    """)
-
+def example_page(): #renamed function
     st.header("Output Data Example")
     st.write("""
     The Output data frame that's calculated consists of:
 
-    *   **Rain_mean:** The average of all the values of rain for that month.
-    *   **Tmax_max:** The maximum temperature of all maximum temperatures for that month.
-    *   **Tmin_mean:** The average of all the values of minimum temperatures for that month.
-    *   **Tmin_min:** The absolute minimum temperature of all the minimum temperatures for that month.
+    *   **Precipitation:** The average of all the values of rain for that month.
+    *   **Tmax:** The maximum temperature of all maximum temperatures for that month.
+    *   **Tmin:** The average of all the values of minimum temperatures for that month.
+    *   **Abs_Tmin:** The absolute minimum temperature of all the minimum temperatures for that month.
     """)
     example_output = pd.DataFrame({
          'Month': [1, 2, 12],
-         'Rain_mean': [39.1455, 32.8182, 46.6364],
+         'Rain': [39.1455, 32.8182, 46.6364],
          'Tmax_max': [13.8, 21.0, 17.8],
          'Tmin_mean': [-11.9727, -7.5727, -6.9091],
          'Tmin_min': [-18.6, -13.5, -12.2]
@@ -264,27 +255,43 @@ def usage_page():
     st.dataframe(example_output)
     st.write("Absolute minimum temperature (°C): -18.6")
     st.write("Absolute maximum temperature (°C): 40.3")
+    st.write("Average rainfall in a year (mm): 527.81")
 
     st.header("Example of generated R code")
     st.code("""
+
+    # Install the 'climatol' package if not already installed
+    install.packages('climatol')
+
+    # Load the climatol library to access its functions
     library(climatol)
 
-    precipitation <- c(39.1, 32.8, 36.2, 38.4, 50.0, 48.7, 57.9, 54.5, 46.1, 49.3, 42.8, 46.6)
-    mean_monthly_tmax <- c(13.8, 21.0, 24.3, 29.8, 34.7, 38.1, 40.3, 39.7, 34.6, 28.8, 21.5, 17.8)
-    mean_monthly_tmin <- c(-12.0, -7.6, -4.2, 2.1, 8.5, 13.3, 15.5, 14.6, 9.1, 3.4, -2.3, -6.9)
-    absolute_monthly_min_t <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
+    # Create monthly values in the same order as the columns in the input data
+    rain <- c(39.1, 32.8, 27.3, 30.4, 57.9, 54.6, 56.8, 35.6, 48.6, 41.7, 56.4, 46.6) # Mean total precipitation
+    tmax <- c(13.8, 21.0, 25.1, 30.8, 32.2, 38.9, 40.3, 39.1, 36.5, 27.8, 25.0, 17.8) # Mean maximum daily temperature
+    tmin <- c(-12.0, -7.6, -5.6, -1.3, 3.7, 8.5, 9.3, 9.6, 4.3, -1.3, -3.8, -6.9) # Mean minimum daily temperature
+    tmin_abs <- c(-18.6, -13.5, -15.7, -7.5, 0.0, 7.1, 6.9, 7.2, 0.3, -3.8, -6.0, -12.2) # Absolute minimum daily temperature. This last row is used only to determine the probable frost months (when absolute monthly minimums are equal or lower than 0 C).
 
+    # Combine all climate variables into a single matrix for analysis
+    # Each row represents a different variable, each column represents a month
     data.matrix <- rbind(
-      precipitation,
-      mean_monthly_tmax,
-      mean_monthly_tmin,
-      absolute_monthly_min_t)
+                   rain,
+                   tmax,
+                   tmin,
+                   tmin_abs)
 
-    diagwl(data.matrix,
-            est="Pocsaj",
-            cols=NULL,
-            alt="97",
-            mlab="en")
+    diagwl(                     # diagwl - the function to generate the Walter-Lieth diagram
+        data.matrix,            # data.matrix - the climate data to visualize
+        est  = "Pocsaj",        # Name of the climatological station.
+        cols = NULL,            # Columns containing dates and daily data of precipitation and extreme temperatures. Set to NULL if a monthly climate summary is provided.
+        alt  = "97",            # Elevation (altitude) of the climatological station.
+        shem = NULL,            # NULL by default. Set to TRUE or FALSE to force southern or northern hemisphere.
+        p3line = FALSE,         # Draw a supplementary precipitation line referenced to three times the temperature? (FALSE by default.)
+        mlab = "en")            # Vector of 12 monthly labels for the X axis. It may be set to just 'en' or 'es' to use the first letter of month names in English or Spanish respectively.
+
+    # As described by Walter and Lieth, when monthly precipitation is greater than 100 mm, the scale is increased from 2 mm/C to 20 mm/C to avoid too high diagrams in very wet locations. This change is indicated by a black horizontal line, and the graph over it is filled in solid blue.
+    # When the precipitation graph lies under the temperature graph (P < 2T) we have an arid period (filled in dotted red vertical lines). Otherwise the period is considered wet (filled in blue lines), unless p3line=TRUE, that draws a precipitation black line with a scale P = 3T; in this case the period in which 3T > P > 2T is considered semi-arid.
+    # Daily maximum average temperature of the hottest month and daily minimum average temperature of the coldest month are frequently used in vegetation studies, and are labeled in black at the left margin of the diagram.
     """, language='r')
 
 def data_source_page():
@@ -341,25 +348,30 @@ if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'Editor'  # Start on the Editor page
 
 # Navigation buttons
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5) #Added a column
 with col1:
     if st.button('Editor'):
         st.session_state['current_page'] = 'Editor'
 with col2:
-    if st.button('Usage'):
-        st.session_state['current_page'] = 'Usage'
+    if st.button('Data Format'): #Renamed button
+        st.session_state['current_page'] = 'Data Format'
 with col3:
+     if st.button('Example'): #Renamed button
+        st.session_state['current_page'] = 'Example'
+with col4:
     if st.button('Data Source'):
         st.session_state['current_page'] = 'Data Source'
-with col4:
+with col5:
     if st.button('About'):
         st.session_state['current_page'] = 'About'
 
 # Page display
 if st.session_state['current_page'] == 'Editor':
-    Editor_page()
-elif st.session_state['current_page'] == 'Usage':
-    usage_page()
+    editor_page()
+elif st.session_state['current_page'] == 'Data Format': #Renamed
+    data_format_page()
+elif st.session_state['current_page'] == 'Example': #Renamed
+    example_page()
 elif st.session_state['current_page'] == 'Data Source':
     data_source_page()
 elif st.session_state['current_page'] == 'About':
