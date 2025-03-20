@@ -185,19 +185,9 @@ def editor_page():
 
 def data_format_page(): #Renamed function
     st.header("Input Data Format")
-    st.write("""
-    The input Excel file (`.xlsx`) can be in one of three formats:
-
-    **Format 1: Separate Year and Month Columns**
-
-    *   **Year:** The year of the observation.
-    *   **Month:** The month of the observation (1-12).
-    *   **Rain:** Monthly precipitation in mm.
-    *   **Tmin:** Minimum monthly temperature in °C.
-    *   **Tmax:** Maximum monthly temperature in °C.
-
-    **Example (Separate Year/Month):**
-    """)
+    st.write("The input Excel file (`.xlsx`) can have one of these three formats:")
+    
+    st.write("**Format 1: Separate Year/Month Columns**")
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
@@ -206,41 +196,32 @@ def data_format_page(): #Renamed function
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_separate)
-
-    st.write("**Format 2: Combined YearMonth or Time Column**")
-    st.write("""
-    *   **YearMonth** or **Time**:  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
-    *   **Rain:** Monthly precipitation in mm.
-    *   **Tmin:** Minimum monthly temperature in °C.
-    *   **Tmax:** Maximum monthly temperature in °C.
-    """)
-
-    st.write("**Example (Combined YearMonth/Time):**")
+    
+    st.write("**Format 2: Combined YearMonth/Time Column**")
     example_input_combined = pd.DataFrame({
-        'Time': [201401, 201402, 201403, 202412],  # Use 'Time' here
+        'Time': [201401, 201402, 201403, 202412],
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_combined)
-
-
-    st.write("**Format 3: Hungarian Meteorological Service Data**")
-    st.write("""
-        *   **Time:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
-        *   **rau:** Monthly precipitation in mm.
-        *   **tn:** Minimum monthly temperature in °C.
-        *   **tx:** Maximum monthly temperature in °C.
-        """)
-    st.write("**Example (Hungarian Meteorological Service):**")
+    
+    st.write("**Format 3: Hungarian Meteorological Service**")
     example_input_hms = pd.DataFrame({
     'Time': [201401, 201402, 201403, 202412],
     'rau': [36.9, 21.7, 11.6, 14.9],
     'tn': [-7.4, -13.5, -2.5, -3.5],
     'tx': [13.8, 15.7, 23.1, 11.2]
     })
-
     st.dataframe(example_input_hms)
+    
+    st.write("""
+    | Format | Date Columns        | Rain (mm) | Tmin (°C) | Tmax (°C) |
+    |--------|---------------------|-----------|-----------|-----------|
+    | 1      | `Year`, `Month`     | `Rain`    | `Tmin`    | `Tmax`    |
+    | 2      | `YearMonth` or `Time` (YYYYMM) | `Rain`    | `Tmin`    | `Tmax`    |
+    | 3      | `Time` (YYYYMM)     | `rau`     | `tn`      | `tx`      |
+    """)
 
 def example_page(): #renamed function
     st.header("Output Data Example")
