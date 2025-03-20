@@ -195,7 +195,7 @@ def data_format_page(): #Renamed function
     | 3      | `Time` (YYYYMM)     | `rau`     | `tn`      | `tx`      |
     """)
 
-    st.write(
+    st.write("""
     *   **Year:** The year of the observation (eg. 2014).
     *   **Month:** The month of the observation (1-12).
     *   **Time / YearMonth:** The year and month of the observation (eg. 201401 for January 2014).      
