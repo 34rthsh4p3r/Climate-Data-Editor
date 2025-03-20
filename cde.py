@@ -22,15 +22,11 @@ def editor_page():
         try:
             df = pd.read_excel(uploaded_file)
 
-            # --- Data Validation and Preprocessing ---
-
-            # 1. Check for Hungarian Meteorological Service format
             if {'Time', 'rau', 'tn', 'tx'}.issubset(df.columns):
                 st.write("Detected Hungarian Meteorological Service data format.")
-                # Rename columns to standard names
                 df.rename(columns={
-                    'Time': 'YearMonth',  # Keep 'Time' renamed to YearMonth for consistency
-                    'rau': 'Rain',  #  <-- This is correct
+                    'Time': 'YearMonth',  
+                    'rau': 'Rain',  
                     'tn': 'Tmin',
                     'tx': 'Tmax'
                 }, inplace=True)
@@ -43,15 +39,14 @@ def editor_page():
                 df['Month'] = df['YearMonth'] % 100
                 df.drop(columns=['YearMonth'], inplace=True)
 
-                # Station name and elevation are NOT used for HMS format.
-                station_name = station_name_input  # Use input values
+                station_name = station_name_input
                 elevation = elevation_input
 
                 required_columns = ["Year", "Month", "Rain", "Tmin", "Tmax"] # Correct
 
             # 2. Check for standard formats (separate or combined Year/Month)
             else:
-                required_columns = ["Rain", "Tmin", "Tmax"]  #  Correct
+                required_columns = ["Rain", "Tmin", "Tmax"]
                 if 'Year' in df.columns and 'Month' in df.columns:
                     st.write("Detected separate Year and Month columns.")
                     df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
@@ -62,7 +57,7 @@ def editor_page():
                     if not df['Month'].between(1, 12).all():
                         st.error("Error: 'Month' values must be between 1 and 12.")
                         return
-                    required_columns.extend(['Year', 'Month']) # Correct
+                    required_columns.extend(['Year', 'Month'])
 
                 elif 'YearMonth' in df.columns or 'Time' in df.columns:  # Check for YearMonth OR Time
                     st.write("Detected combined YearMonth or Time column.")
@@ -89,7 +84,6 @@ def editor_page():
 
 
             # --- Common Validation (for all formats) ---
-            # ***CRITICAL CHECK HERE***
             if not all(col in df.columns for col in required_columns):
                 st.error(f"Error: The Excel file must contain the following columns: {', '.join(required_columns)}")
                 return  #  Exit early if columns are missing
@@ -124,8 +118,8 @@ def editor_page():
             absolute_tmax = df['Tmax'].max()
 
              # Calculate yearly average rainfall and overall average
-            yearly_rainfall = df.groupby('Year')['Rain'].sum()  # Correct
-            average_yearly_rainfall = yearly_rainfall.mean()  # Correct
+            yearly_rainfall = df.groupby('Year')['Rain'].sum()
+            average_yearly_rainfall = yearly_rainfall.mean()
 
 
             st.header("Output Data")
@@ -147,29 +141,23 @@ def editor_page():
             **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
             """)
             
-            # Use different variable names for the R code
-            rain_data = monthly_avg['Rain']
-            tmax_data = monthly_avg['Tmax_max']  # Use the correct column name from the aggregation
-            tmin_mean_data = monthly_avg['Tmin_mean']
-            tmin_abs_data = monthly_avg['Tmin_min']
-
-            rain_str = ", ".join([f"{x:.1f}" for x in rain_data]) # Correct
-            tmax_str = ", ".join([f"{x:.1f}" for x in tmax_data])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in tmin_mean_data])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in tmin_abs_data])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
 
             output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
-            output_buffer.write(f"rain_values <- c({rain_str})\n")  # Changed variable name
-            output_buffer.write(f"tmax_values <- c({tmax_str})\n")  # Changed variable name
-            output_buffer.write(f"tmin_mean_values <- c({tmin_mean_str})\n") # Changed variable name
-            output_buffer.write(f"tmin_abs_values <- c({tmin_abs_str})\n\n")  # Changed variable name
-            output_buffer.write("data_matrix <- rbind(\n")  # Changed variable name
-            output_buffer.write("  rain_values,\n") # Changed variable name
-            output_buffer.write("  tmax_values,\n") # Changed variable name
-            output_buffer.write("  tmin_mean_values,\n") # Changed variable name
-            output_buffer.write("  tmin_abs_values)\n\n") # Changed variable name
-            output_buffer.write(f'diagwl(data_matrix,\n')  # Changed variable name
+            output_buffer.write(f"precipitation <- c({rain_str})\n")
+            output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
+            output_buffer.write(f"mean_monthly_tmin <- c({tmin_mean_str})\n")
+            output_buffer.write(f"absolute_monthly_min_t <- c({tmin_abs_str})\n\n")
+            output_buffer.write("data.matrix <- rbind(\n")
+            output_buffer.write("  precipitation,\n")
+            output_buffer.write("  mean_monthly_tmax,\n")
+            output_buffer.write("  mean_monthly_tmin,\n")
+            output_buffer.write("  absolute_monthly_min_t)\n\n")
+            output_buffer.write(f'diagwl(data.matrix,\n')
             # Use the values obtained from user input
             output_buffer.write(f'       est="{station_name}",\n')
             output_buffer.write(f'       cols=NULL,\n')
