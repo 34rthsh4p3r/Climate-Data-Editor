@@ -145,7 +145,8 @@ def editor_page():
             **Copy R Code:** The generated R code can be copied and pasted into RStudio.
     
             **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
-
+            """)
+            
             # Use different variable names for the R code
             rain_data = monthly_avg['Rain']
             tmax_data = monthly_avg['Tmax_max']  # Use the correct column name from the aggregation
