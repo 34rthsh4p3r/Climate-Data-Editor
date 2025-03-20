@@ -8,23 +8,6 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 # --- Page Functions ---
 
 def editor_page():
-    st.header("How to")
-    st.write("""
-    **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
-    
-    **Copy R Code:** The generated R code will appear in a code block. Copy this code.
-    
-    **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
-
-    
-    **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tmin**, and **Tmax**.
-    
-    **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tmin**, and **Tmax**.
-    
-    **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'tn'** (Tmin), and **'tx'** (Tmax).
-
-    """)
-
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
     # Station Name and Elevation ONLY for non-HMS formats
@@ -122,6 +105,10 @@ def editor_page():
                 return # Exit early if there are incomplete years
 
             st.header("Input Data")
+            st.write("""
+            **Review Data:** The uploaded data are displayed in the table. Check for any errors.
+            """)
+            
             st.dataframe(df)
 
             # --- Data Processing ---
@@ -142,6 +129,9 @@ def editor_page():
 
 
             st.header("Output Data")
+            st.write("""
+            **Review Data:** The calculated monthly averages are displayed in the table.
+            """)
             st.dataframe(monthly_avg)
             st.write(f"Absolute minimum temperature (°C): {absolute_tmin:.1f}")
             st.write(f"Absolute maximum temperature (°C): {absolute_tmax:.1f}")
@@ -150,6 +140,11 @@ def editor_page():
 
             # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
+            st.write("""
+
+            **Copy R Code:** The generated R code can be copied and pasted into RStudio.
+    
+            **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
 
             # Use different variable names for the R code
             rain_data = monthly_avg['Rain']
