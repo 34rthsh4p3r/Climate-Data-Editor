@@ -8,14 +8,20 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 # --- Page Functions ---
 
 def editor_page():
-    st.header("Upload Climate Data")
+    st.header("How to")
     st.write("""
+    1.  **Upload Data:** Use the "Choose an Excel file" button to upload your climate data file.
+    2.  **Enter Station Information:**  Enter the station name and elevation in the provided text boxes.
+    3.  **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
+    4.  **Copy R Code:** The generated R code will appear in a code block. Copy this code.
+    5.  **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
+
     Excel data can be in one of three formats:
 
     **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tmin**, and **Tmax**.
-    
+
     **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tmin**, and **Tmax**.
-    
+
     **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'tn'** (Tmin), and **'tx'** (Tmax).
 
     """)
@@ -42,7 +48,7 @@ def editor_page():
                 # Rename columns to standard names
                 df.rename(columns={
                     'Time': 'YearMonth',  # Keep 'Time' renamed to YearMonth for consistency
-                    'rau': 'Rain',
+                    'rau': 'Rain',  #  <-- This is correct
                     'tn': 'Tmin',
                     'tx': 'Tmax'
                 }, inplace=True)
@@ -59,11 +65,11 @@ def editor_page():
                 station_name = station_name_input  # Use input values
                 elevation = elevation_input
 
-                required_columns = ["Year", "Month", "Rain", "Tmin", "Tmax"]
+                required_columns = ["Year", "Month", "Rain", "Tmin", "Tmax"] # Correct
 
             # 2. Check for standard formats (separate or combined Year/Month)
             else:
-                required_columns = ["Rain", "Tmin", "Tmax"]  # Removed Tavg
+                required_columns = ["Rain", "Tmin", "Tmax"]  #  Correct
                 if 'Year' in df.columns and 'Month' in df.columns:
                     st.write("Detected separate Year and Month columns.")
                     df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
@@ -74,7 +80,7 @@ def editor_page():
                     if not df['Month'].between(1, 12).all():
                         st.error("Error: 'Month' values must be between 1 and 12.")
                         return
-                    required_columns.extend(['Year', 'Month'])
+                    required_columns.extend(['Year', 'Month']) # Correct
 
                 elif 'YearMonth' in df.columns or 'Time' in df.columns:  # Check for YearMonth OR Time
                     st.write("Detected combined YearMonth or Time column.")
@@ -89,7 +95,7 @@ def editor_page():
                     if not df['Month'].between(1, 12).all():
                         st.error("Error: Extracted 'Month' values must be between 1 and 12.")
                         return
-                    required_columns.extend(['Year', 'Month'])
+                    required_columns.extend(['Year', 'Month'])  #Correct
 
                 else:
                     st.error("Error: The Excel file must contain either separate **'Year'** and **'Month'** columns, a combined **'YearMonth'** or **'Time'** column.")
@@ -101,20 +107,20 @@ def editor_page():
 
 
             # --- Common Validation (for all formats) ---
-
+            # ***CRITICAL CHECK HERE***
             if not all(col in df.columns for col in required_columns):
                 st.error(f"Error: The Excel file must contain the following columns: {', '.join(required_columns)}")
-                return
+                return  #  Exit early if columns are missing
 
             if df[required_columns].isnull().any().any():
                 st.error("Error: Missing values found in the required columns.")
-                return
+                return  # Exit early if there are missing values
 
             year_counts = df.groupby('Year')['Month'].count()
             incomplete_years = year_counts[year_counts != 12].index.tolist()
             if incomplete_years:
                 st.error(f"Error: Incomplete data for year(s): {', '.join(map(str, incomplete_years))}. Each year must have data for all 12 months.")
-                return
+                return # Exit early if there are incomplete years
 
             st.header("Input Data")
             st.dataframe(df)
@@ -132,8 +138,8 @@ def editor_page():
             Absolute_Tmax = df['Tmax'].max()
 
              # Calculate yearly average rainfall and overall average
-            yearly_rainfall = df.groupby('Year')['Rain'].sum()
-            average_yearly_rainfall = yearly_rainfall.mean()
+            yearly_rainfall = df.groupby('Year')['Rain'].sum()  # Correct
+            average_yearly_rainfall = yearly_rainfall.mean()  # Correct
 
 
             st.header("Output Data")
@@ -146,7 +152,7 @@ def editor_page():
             # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
 
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']]) # Correct
             tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
             tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
             tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
@@ -299,7 +305,7 @@ def data_source_page():
     st.write("""
     This application is compatible with climate data from the Hungarian Meteorological Service (OMSZ, also referred to as HungaroMet).
     """)
-    
+
     st.image("HungaroMet_logo_800x_ENG.png")
 
     st.write("""
