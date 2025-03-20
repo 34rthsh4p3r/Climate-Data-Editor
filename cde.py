@@ -204,7 +204,7 @@ def data_format_page():
     *   **Tmax / tx:** Maximum monthly temperature in °C.
     """)
 
-    # Create DataFrames
+    st.write("**Format 1: Separate Year/Month Columns**")
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
@@ -212,33 +212,25 @@ def data_format_page():
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
-
+    st.dataframe(example_input_separate)
+    
+    st.write("**Format 2: Combined YearMonth/Time Column**")
     example_input_combined = pd.DataFrame({
         'Time': [201401, 201402, 201403, 202412],
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
-
-    example_input_hms = pd.DataFrame({
-        'Time': [201401, 201402, 201403, 202412],
-        'rau': [36.9, 21.7, 11.6, 14.9],
-        'tn': [-7.4, -13.5, -2.5, -3.5],
-        'tx': [13.8, 15.7, 23.1, 11.2]
-    })
-
-
-    def center_df(df):
-        return df.style.set_table_styles([{'selector': 'th, td', 'props': [('text-align', 'center')]}])
-
-    st.write("**Format 1: Separate Year/Month Columns**")
-    st.dataframe(center_df(example_input_separate))
-
-    st.write("**Format 2: Combined YearMonth/Time Column**")
-    st.dataframe(center_df(example_input_combined))
-
+    st.dataframe(example_input_combined)
+    
     st.write("**Format 3: Hungarian Meteorological Service**")
-    st.dataframe(center_df(example_input_hms))
+    example_input_hms = pd.DataFrame({
+    'Time': [201401, 201402, 201403, 202412],
+    'rau': [36.9, 21.7, 11.6, 14.9],
+    'tn': [-7.4, -13.5, -2.5, -3.5],
+    'tx': [13.8, 15.7, 23.1, 11.2]
+    })
+    st.dataframe(example_input_hms)
 
 def example_page():
     st.header("Output Data Example")
