@@ -186,7 +186,24 @@ def editor_page():
 def data_format_page(): #Renamed function
     st.header("Input Data Format")
     st.write("The input Excel file (`.xlsx`) can have one of these three formats:")
-    
+
+    st.write("""
+    | Format | Date Columns        | Rain (mm) | Tmin (°C) | Tmax (°C) |
+    |--------|---------------------|-----------|-----------|-----------|
+    | 1      | `Year`, `Month`     | `Rain`    | `Tmin`    | `Tmax`    |
+    | 2      | `YearMonth` or `Time` (YYYYMM) | `Rain`    | `Tmin`    | `Tmax`    |
+    | 3      | `Time` (YYYYMM)     | `rau`     | `tn`      | `tx`      |
+    """)
+
+    st.write(
+    *   **Year:** The year of the observation (eg. 2014).
+    *   **Month:** The month of the observation (1-12).
+    *   **Time / YearMonth:** The year and month of the observation (eg. 201401 for January 2014).      
+    *   **Rain / rau:** Monthly precipitation in mm.
+    *   **Tmin / tn:** Minimum monthly temperature in °C.
+    *   **Tmax / tx:** Maximum monthly temperature in °C.
+    """)
+          
     st.write("**Format 1: Separate Year/Month Columns**")
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
@@ -214,14 +231,6 @@ def data_format_page(): #Renamed function
     'tx': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_hms)
-    
-    st.write("""
-    | Format | Date Columns        | Rain (mm) | Tmin (°C) | Tmax (°C) |
-    |--------|---------------------|-----------|-----------|-----------|
-    | 1      | `Year`, `Month`     | `Rain`    | `Tmin`    | `Tmax`    |
-    | 2      | `YearMonth` or `Time` (YYYYMM) | `Rain`    | `Tmin`    | `Tmax`    |
-    | 3      | `Time` (YYYYMM)     | `rau`     | `tn`      | `tx`      |
-    """)
 
 def example_page(): #renamed function
     st.header("Output Data Example")
