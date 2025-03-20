@@ -183,7 +183,7 @@ def editor_page():
 
 
 
-def data_format_page(): #Renamed function
+def data_format_page(): 
     st.header("Input Data Format")
     st.write("The input Excel file (`.xlsx`) can have one of these three formats:")
 
@@ -204,7 +204,7 @@ def data_format_page(): #Renamed function
     *   **Tmax / tx:** Maximum monthly temperature in °C.
     """)
 
-    # Create DataFrames (no changes here)
+    # Create DataFrames
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
@@ -227,25 +227,20 @@ def data_format_page(): #Renamed function
         'tx': [13.8, 15.7, 23.1, 11.2]
     })
 
-    # Use columns layout to display side-by-side
-    col1, col2, col3 = st.columns(3)
 
-    # Center-align the data in the DataFrames using st.markdown and HTML/CSS
     def center_df(df):
         return df.style.set_table_styles([{'selector': 'th, td', 'props': [('text-align', 'center')]}])
-    with col1:
-        st.write("**Format 1: Separate Year/Month Columns**")
-        st.dataframe(center_df(example_input_separate))  # Apply the centering style
 
-    with col2:
-        st.write("**Format 2: Combined YearMonth/Time Column**")
-        st.dataframe(center_df(example_input_combined))  # Apply the centering style
+    st.write("**Format 1: Separate Year/Month Columns**")
+    st.dataframe(center_df(example_input_separate))
 
-    with col3:
-        st.write("**Format 3: Hungarian Meteorological Service**")
-        st.dataframe(center_df(example_input_hms)) # Apply the centering style
+    st.write("**Format 2: Combined YearMonth/Time Column**")
+    st.dataframe(center_df(example_input_combined))
 
-def example_page(): #renamed function
+    st.write("**Format 3: Hungarian Meteorological Service**")
+    st.dataframe(center_df(example_input_hms))
+
+def example_page():
     st.header("Output Data Example")
     st.write("""
     The Output data frame that's calculated consists of:
