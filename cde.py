@@ -198,13 +198,13 @@ def data_format_page(): #Renamed function
     st.write("""
     *   **Year:** The year of the observation (eg. 2014).
     *   **Month:** The month of the observation (1-12).
-    *   **Time / YearMonth:** The year and month of the observation (eg. 201401 for January 2014).      
+    *   **Time / YearMonth:** The year and month of the observation (eg. 201401 for January 2014).
     *   **Rain / rau:** Monthly precipitation in mm.
     *   **Tmin / tn:** Minimum monthly temperature in °C.
     *   **Tmax / tx:** Maximum monthly temperature in °C.
     """)
-          
-    st.write("**Format 1: Separate Year/Month Columns**")
+
+    # Create DataFrames (no changes here)
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
@@ -212,25 +212,38 @@ def data_format_page(): #Renamed function
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
-    st.dataframe(example_input_separate)
-    
-    st.write("**Format 2: Combined YearMonth/Time Column**")
+
     example_input_combined = pd.DataFrame({
         'Time': [201401, 201402, 201403, 202412],
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
-    st.dataframe(example_input_combined)
-    
-    st.write("**Format 3: Hungarian Meteorological Service**")
+
     example_input_hms = pd.DataFrame({
-    'Time': [201401, 201402, 201403, 202412],
-    'rau': [36.9, 21.7, 11.6, 14.9],
-    'tn': [-7.4, -13.5, -2.5, -3.5],
-    'tx': [13.8, 15.7, 23.1, 11.2]
+        'Time': [201401, 201402, 201403, 202412],
+        'rau': [36.9, 21.7, 11.6, 14.9],
+        'tn': [-7.4, -13.5, -2.5, -3.5],
+        'tx': [13.8, 15.7, 23.1, 11.2]
     })
-    st.dataframe(example_input_hms)
+
+    # Use columns layout to display side-by-side
+    col1, col2, col3 = st.columns(3)
+
+    # Center-align the data in the DataFrames using st.markdown and HTML/CSS
+    def center_df(df):
+        return df.style.set_table_styles([{'selector': 'th, td', 'props': [('text-align', 'center')]}])
+    with col1:
+        st.write("**Format 1: Separate Year/Month Columns**")
+        st.dataframe(center_df(example_input_separate))  # Apply the centering style
+
+    with col2:
+        st.write("**Format 2: Combined YearMonth/Time Column**")
+        st.dataframe(center_df(example_input_combined))  # Apply the centering style
+
+    with col3:
+        st.write("**Format 3: Hungarian Meteorological Service**")
+        st.dataframe(center_df(example_input_hms)) # Apply the centering style
 
 def example_page(): #renamed function
     st.header("Output Data Example")
