@@ -147,9 +147,9 @@ def editor_page():
             st.header("Output text for climatol/diagwl")
 
             rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']]) # Correct
-            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax']])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_abs']])
 
             output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
