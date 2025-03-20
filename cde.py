@@ -8,6 +8,18 @@ st.set_page_config(page_title="Climate Data Editor", layout="wide")
 # --- Page Functions ---
 
 def editor_page():
+    st.header("How to")
+    st.write("""
+    **Review Data:** The uploaded data will be displayed in a table labeled 'Input Data'. The calculated monthly averages will be displayed in a table labeled 'Output Data'. Check for any errors.
+    **Copy R Code:** The generated R code will appear in a code block. Copy this code.
+    **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
+
+    **Format 1:** Separate **Year** and **Month** columns, along with **Rain**, **Tmin**, and **Tmax**.
+    **Format 2:** A combined **YearMonth** or **Time** column (e.g., 202301 for January 2023), along with **Rain**, **Tmin**, and **Tmax**.
+    **Format 3:** Data from the Hungarian Meteorological Service, with columns **'Time'** (YYYYMM), **'rau'** (Rain), **'tn'** (Tmin), and **'tx'** (Tmax).
+
+    """)
+
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
     # Station Name and Elevation ONLY for non-HMS formats
@@ -105,10 +117,6 @@ def editor_page():
                 return # Exit early if there are incomplete years
 
             st.header("Input Data")
-            st.write("""
-            **Review Data:** The uploaded data are displayed in the table. Check for any errors.
-            """)
-            
             st.dataframe(df)
 
             # --- Data Processing ---
@@ -129,9 +137,6 @@ def editor_page():
 
 
             st.header("Output Data")
-            st.write("""
-            **Review Data:** The calculated monthly averages are displayed in the table.
-            """)
             st.dataframe(monthly_avg)
             st.write(f"Absolute minimum temperature (°C): {absolute_tmin:.1f}")
             st.write(f"Absolute maximum temperature (°C): {absolute_tmax:.1f}")
@@ -140,13 +145,7 @@ def editor_page():
 
             # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
-            st.write("""
 
-            **Copy R Code:** The generated R code can be copied and pasted into RStudio.
-    
-            **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
-            """)
-            
             # Use different variable names for the R code
             rain_data = monthly_avg['Rain']
             tmax_data = monthly_avg['Tmax_max']  # Use the correct column name from the aggregation
@@ -183,28 +182,21 @@ def editor_page():
 
 
 
-def data_format_page(): 
+def data_format_page(): #Renamed function
     st.header("Input Data Format")
-    st.write("The input Excel file (`.xlsx`) can have one of these three formats:")
-
     st.write("""
-    | Format | Date Columns        | Rain (mm) | Tmin (°C) | Tmax (°C) |
-    |--------|---------------------|-----------|-----------|-----------|
-    | 1      | `Year`, `Month`     | `Rain`    | `Tmin`    | `Tmax`    |
-    | 2      | `YearMonth` or `Time` (YYYYMM) | `Rain`    | `Tmin`    | `Tmax`    |
-    | 3      | `Time` (YYYYMM)     | `rau`     | `tn`      | `tx`      |
-    """)
+    The input Excel file (`.xlsx`) can be in one of three formats:
 
-    st.write("""
-    *   **Year:** The year of the observation (eg. 2014).
+    **Format 1: Separate Year and Month Columns**
+
+    *   **Year:** The year of the observation.
     *   **Month:** The month of the observation (1-12).
-    *   **Time / YearMonth:** The year and month of the observation (eg. 201401 for January 2014).
-    *   **Rain / rau:** Monthly precipitation in mm.
-    *   **Tmin / tn:** Minimum monthly temperature in °C.
-    *   **Tmax / tx:** Maximum monthly temperature in °C.
-    """)
+    *   **Rain:** Monthly precipitation in mm.
+    *   **Tmin:** Minimum monthly temperature in °C.
+    *   **Tmax:** Maximum monthly temperature in °C.
 
-    st.write("**Format 1: Separate Year/Month Columns**")
+    **Example (Separate Year/Month):**
+    """)
     example_input_separate = pd.DataFrame({
         'Year': [2014, 2014, 2014, 2024],
         'Month': [1, 2, 3, 12],
@@ -213,26 +205,43 @@ def data_format_page():
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_separate)
-    
-    st.write("**Format 2: Combined YearMonth/Time Column**")
+
+    st.write("**Format 2: Combined YearMonth or Time Column**")
+    st.write("""
+    *   **YearMonth** or **Time**:  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
+    *   **Rain:** Monthly precipitation in mm.
+    *   **Tmin:** Minimum monthly temperature in °C.
+    *   **Tmax:** Maximum monthly temperature in °C.
+    """)
+
+    st.write("**Example (Combined YearMonth/Time):**")
     example_input_combined = pd.DataFrame({
-        'Time': [201401, 201402, 201403, 202412],
+        'Time': [201401, 201402, 201403, 202412],  # Use 'Time' here
         'Rain': [36.9, 21.7, 11.6, 14.9],
         'Tmin': [-7.4, -13.5, -2.5, -3.5],
         'Tmax': [13.8, 15.7, 23.1, 11.2]
     })
     st.dataframe(example_input_combined)
-    
-    st.write("**Format 3: Hungarian Meteorological Service**")
+
+
+    st.write("**Format 3: Hungarian Meteorological Service Data**")
+    st.write("""
+        *   **Time:**  A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
+        *   **rau:** Monthly precipitation in mm.
+        *   **tn:** Minimum monthly temperature in °C.
+        *   **tx:** Maximum monthly temperature in °C.
+        """)
+    st.write("**Example (Hungarian Meteorological Service):**")
     example_input_hms = pd.DataFrame({
     'Time': [201401, 201402, 201403, 202412],
     'rau': [36.9, 21.7, 11.6, 14.9],
     'tn': [-7.4, -13.5, -2.5, -3.5],
     'tx': [13.8, 15.7, 23.1, 11.2]
     })
+
     st.dataframe(example_input_hms)
 
-def example_page():
+def example_page(): #renamed function
     st.header("Output Data Example")
     st.write("""
     The Output data frame that's calculated consists of:
