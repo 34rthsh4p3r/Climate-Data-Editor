@@ -128,8 +128,8 @@ def editor_page():
             monthly_avg.columns = [f'{col[0]}_{col[1]}' if col[1] else col[0] for col in monthly_avg.columns]
             monthly_avg = monthly_avg.reset_index()
 
-            Absolute_Tmin = df['Tmin'].min()
-            Absolute_Tmax = df['Tmax'].max()
+            absolute_tmin = df['Tmin'].min()
+            absolute_tmax = df['Tmax'].max()
 
              # Calculate yearly average rainfall and overall average
             yearly_rainfall = df.groupby('Year')['Rain'].sum()  # Correct
@@ -138,31 +138,37 @@ def editor_page():
 
             st.header("Output Data")
             st.dataframe(monthly_avg)
-            st.write(f"Absolute minimum temperature (°C): {Absolute_Tmin:.1f}")
-            st.write(f"Absolute maximum temperature (°C): {Absolute_Tmax:.1f}")
+            st.write(f"Absolute minimum temperature (°C): {absolute_tmin:.1f}")
+            st.write(f"Absolute maximum temperature (°C): {absolute_tmax:.1f}")
             st.write(f"Average rainfall in a year (mm): {average_yearly_rainfall:.2f}")
 
 
             # --- Climatol Output ---
             st.header("Output text for climatol/diagwl")
 
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']]) # Correct
-            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax']])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_abs']])
+            # Use different variable names for the R code
+            rain_data = monthly_avg['Rain']
+            tmax_data = monthly_avg['Tmax_max']  # Use the correct column name from the aggregation
+            tmin_mean_data = monthly_avg['Tmin_mean']
+            tmin_abs_data = monthly_avg['Tmin_min']
+
+            rain_str = ", ".join([f"{x:.1f}" for x in rain_data]) # Correct
+            tmax_str = ", ".join([f"{x:.1f}" for x in tmax_data])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in tmin_mean_data])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in tmin_abs_data])
 
             output_buffer = io.StringIO()
             output_buffer.write("library(climatol)\n\n")
-            output_buffer.write(f"rain <- c({rain_str})\n")
-            output_buffer.write(f"tmax <- c({tmax_str})\n")
-            output_buffer.write(f"tmin <- c({tmin_mean_str})\n")
-            output_buffer.write(f"tmin_abs <- c({tmin_abs_str})\n\n")
-            output_buffer.write("data.matrix <- rbind(\n")
-            output_buffer.write("  rain,\n")
-            output_buffer.write("  tmax,\n")
-            output_buffer.write("  tmin,\n")
-            output_buffer.write("  tmin_abs)\n\n")
-            output_buffer.write(f'diagwl(data.matrix,\n')
+            output_buffer.write(f"rain_values <- c({rain_str})\n")  # Changed variable name
+            output_buffer.write(f"tmax_values <- c({tmax_str})\n")  # Changed variable name
+            output_buffer.write(f"tmin_mean_values <- c({tmin_mean_str})\n") # Changed variable name
+            output_buffer.write(f"tmin_abs_values <- c({tmin_abs_str})\n\n")  # Changed variable name
+            output_buffer.write("data_matrix <- rbind(\n")  # Changed variable name
+            output_buffer.write("  rain_values,\n") # Changed variable name
+            output_buffer.write("  tmax_values,\n") # Changed variable name
+            output_buffer.write("  tmin_mean_values,\n") # Changed variable name
+            output_buffer.write("  tmin_abs_values)\n\n") # Changed variable name
+            output_buffer.write(f'diagwl(data_matrix,\n')  # Changed variable name
             # Use the values obtained from user input
             output_buffer.write(f'       est="{station_name}",\n')
             output_buffer.write(f'       cols=NULL,\n')
