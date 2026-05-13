@@ -129,7 +129,7 @@ def editor_page():
             st.dataframe(monthly_avg)
             st.write(f"Absolute minimum temperature (°C): {absolute_tmin:.1f}")
             st.write(f"Absolute maximum temperature (°C): {absolute_tmax:.1f}")
-            st.write(f"Average rainfall in a year (mm): {average_yearly_rainfall:.2f}")
+            st.write(f"Average precipitation in a year (mm): {average_yearly_rainfall:.2f}")
 
 
             # --- Climatol Output ---
@@ -141,10 +141,10 @@ def editor_page():
             **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram.
             """)
             
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']])
-            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax']])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_abs']])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
 
             output_buffer = io.StringIO()
             output_buffer.write("install.packages('climatol') # Install the 'climatol' package if not already installed\n\n")
