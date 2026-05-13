@@ -148,7 +148,7 @@ def editor_page():
 
             output_buffer = io.StringIO()
             output_buffer.write("install.packages('climatol')\n")
-            output_buffer.write("library(climatol)\n")
+            output_buffer.write("library(climatol)\n\n")
             output_buffer.write(f"rain <- c({rain_str})\n")
             output_buffer.write(f"tmax <- c({tmax_str})\n")
             output_buffer.write(f"tmin <- c({tmin_mean_str})\n")
