@@ -69,19 +69,18 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 *   **Year:** The year of the observation.
 *   **Month:** The month of the observation (1-12).
 *   **Rain:** Monthly precipitation in mm.
-*   **Tavg:** Average monthly temperature in °C.
 *   **Tmin:** Minimum monthly temperature in °C.
 *   **Tmax:** Maximum monthly temperature in °C.
 
 **Example (Separate Year/Month):**
 
-   | Year | Month | Rain | Tavg | Tmin  | Tmax  |
-   |------|-------|------|------|-------|-------|
-   | 2014 | 1     | 36.9 | 2.7  | -7.4  | 13.8  |
-   | 2014 | 2     | 21.7 | 3.9  | -13.5 | 15.7  |
-   | 2014 | 3     | 11.6 | 9.3  | -2.5  | 23.1  |
-   | ...  | ...   | ...  | ...  | ...   | ...   |
-   | 2024 | 12    | 14.9 | 2.2  | -3.5  | 11.2  |
+   | Year | Month | Rain | Tmin  | Tmax  |
+   |------|-------|------|-------|-------|
+   | 2014 | 1     | 36.9 | -7.4  | 13.8  |
+   | 2014 | 2     | 21.7 | -13.5 | 15.7  |
+   | 2014 | 3     | 11.6 | -2.5  | 23.1  |
+   | ...  | ...   | ...  | ...   | ...   |
+   | 2024 | 12    | 14.9 | -3.5  | 11.2  |
 
 
 **Format 2: Combined YearMonth or Time Column**
@@ -90,19 +89,18 @@ The input Excel file (`.xlsx`) must have the following columns, *exactly* as nam
 
 *   **YearMonth** *or* **Time:** A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
 *   **Rain:** Monthly precipitation in mm.
-*   **Tavg:** Average monthly temperature in °C.
 *   **Tmin:** Minimum monthly temperature in °C.
 *   **Tmax:** Maximum monthly temperature in °C.
 
 **Example (Combined YearMonth/Time):**
 
-   | Time   | Rain | Tavg | Tmin  | Tmax  |
-   |--------|------|------|-------|-------|
-   | 201401 | 36.9 | 2.7  | -7.4  | 13.8  |
-   | 201402 | 21.7 | 3.9  | -13.5 | 15.7  |
-   | 201403 | 11.6 | 9.3  | -2.5  | 23.1  |
-   |  ...   | ...  | ...  | ...   | ...   |
-   | 202412 | 14.9 | 2.2  | -3.5  | 11.2  |
+   | Time   | Rain | Tmin  | Tmax  |
+   |--------|------|-------|-------|
+   | 201401 | 36.9 | -7.4  | 13.8  |
+   | 201402 | 21.7 | -13.5 | 15.7  |
+   | 201403 | 11.6 | -2.5  | 23.1  |
+   |  ...   | ...  | ...   | ...   |
+   | 202412 | 14.9 | -3.5  | 11.2  |
 
 **Format 3: Hungarian Meteorological Service Data**
 
@@ -110,19 +108,18 @@ This format is specifically designed for data from the Hungarian Meteorological 
 
 *   **Time:** A combined year and month column in the format YYYYMM (e.g., 201401 for January 2014).
 *   **rau:** Monthly precipitation in mm.
-*   **t:** Average monthly temperature in °C.
 *   **tn:** Minimum monthly temperature in °C.
 *   **tx:** Maximum monthly temperature in °C.
 
 **Example (Hungarian Meteorological Service):**
 
-   | Time   |  rau |   t  |   tn  |   tx  |
-   |--------|------|------|-------|-------|
-   | 201401 | 36.9 | 2.7  | -7.4  | 13.8  |
-   | 201402 | 21.7 | 3.9  | -13.5 | 15.7  |
-   | 201403 | 11.6 | 9.3  | -2.5  | 23.1  |
-   |  ...   | ...  | ...  | ...   | ...   |
-   | 202412 | 14.9 | 2.2  | -3.5  | 11.2  |
+   | Time   |  rau |   tn  |   tx  |
+   |--------|------|-------|-------|
+   | 201401 | 36.9 | -7.4  | 13.8  |
+   | 201402 | 21.7 | -13.5 | 15.7  |
+   | 201403 | 11.6 | -2.5  | 23.1  |
+   |  ...   | ...  | ...   | ...   |
+   | 202412 | 14.9 | -3.5  | 11.2  |
 
 ---
 
@@ -161,13 +158,13 @@ library(climatol)
 precipitation <- c(39.1, 32.8, 36.2, 38.4, 50.0, 48.7, 57.9, 54.5, 46.1, 49.3, 42.8, 46.6)
 mean_monthly_tmax <- c(13.8, 21.0, 24.3, 29.8, 34.7, 38.1, 40.3, 39.7, 34.6, 28.8, 21.5, 17.8)
 mean_monthly_tmin <- c(-12.0, -7.6, -4.2, 2.1, 8.5, 13.3, 15.5, 14.6, 9.1, 3.4, -2.3, -6.9)
-absolute_monthly_min_t <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
+absolute_monthly_tmin <- c(-18.6, -13.5, -9.9, -4.5, 1.2, 6.8, 9.2, 8.0, 3.0, -3.0, -8.8, -12.2)
 
 data.matrix <- rbind(
   precipitation,
   mean_monthly_tmax,
   mean_monthly_tmin,
-  absolute_monthly_min_t)
+  absolute_monthly_tmin)
 
 diagwl(data.matrix,
         est="Pocsaj",
