@@ -138,31 +138,33 @@ def editor_page():
 
             **Copy R Code:** The generated R code can be copied and pasted into RStudio.
     
-            **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram. Make sure you have the `climatol` package installed (`install.packages("climatol")`). After running the code, the Walter-Lieth diagram will be generated in your RStudio Plots pane (or the default graphics device).
+            **Run in R/RStudio:** Paste the copied code into your RStudio console or an R script and run it. This will create the Walter-Lieth diagram.
             """)
             
-            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain_mean']])
-            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax_max']])
-            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_mean']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_min']])
+            rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']])
+            tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax']])
+            tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
 
             output_buffer = io.StringIO()
-            output_buffer.write("library(climatol)\n\n")
-            output_buffer.write(f"precipitation <- c({rain_str})\n")
-            output_buffer.write(f"mean_monthly_tmax <- c({tmax_str})\n")
-            output_buffer.write(f"mean_monthly_tmin <- c({tmin_mean_str})\n")
-            output_buffer.write(f"absolute_monthly_min_t <- c({tmin_abs_str})\n\n")
-            output_buffer.write("data.matrix <- rbind(\n")
-            output_buffer.write("  precipitation,\n")
-            output_buffer.write("  mean_monthly_tmax,\n")
-            output_buffer.write("  mean_monthly_tmin,\n")
-            output_buffer.write("  absolute_monthly_min_t)\n\n")
-            output_buffer.write(f'diagwl(data.matrix,\n')
+            output_buffer.write("install.packages('climatol') # Install the 'climatol' package if not already installed\n\n")
+            output_buffer.write("library(climatol) # Load the climatol library to access its functions\n\n")
+            output_buffer.write(f"rain <- c({rain_str}) # Mean total precipitation\n")
+            output_buffer.write(f"tmax <- c({tmax_str}) # Mean maximum monthly temperature\n")
+            output_buffer.write(f"tmin <- c({tmin_mean_str}) # Mean minimum monthly temperature\n")
+            output_buffer.write(f"tmin_abs <- c({tmin_abs_str}) # Absolute minimum monthly temperature. This last row is used only to determine the probable frost months (when absolute monthly minimums are equal or lower than 0 C)\n\n")
+            output_buffer.write("data.matrix <- rbind( # Combine all climate variables into a single matrix for analysis\n")
+            output_buffer.write("  rain,\n")
+            output_buffer.write("  tmax,\n")
+            output_buffer.write("  tmin,\n")
+            output_buffer.write("  tmin_abs)\n\n")
+            output_buffer.write(f'diagwl( # diagwl - the function to generate the Walter-Lieth diagram\n')
+            output_buffer.write(f'       data.matrix, # data.matrix - the climate data to visualize\n')
             # Use the values obtained from user input
-            output_buffer.write(f'       est="{station_name}",\n')
-            output_buffer.write(f'       cols=NULL,\n')
-            output_buffer.write(f'       alt="{elevation}",\n')
-            output_buffer.write(f'       mlab="en")\n')
+            output_buffer.write(f'       est="{station_name}", # Name of the climatological station\n')
+            output_buffer.write(f'       cols=NULL, # Columns containing dates and daily data of precipitation and extreme temperatures. Set to NULL if a monthly climate summary is provided.\n')
+            output_buffer.write(f'       alt="{elevation}", # Elevation (altitude) of the climatological station\n')
+            output_buffer.write(f'       mlab="en") # Vector of 12 monthly labels for the X axis\n')
 
             st.code(output_buffer.getvalue(), language="r")
 
@@ -225,17 +227,17 @@ def example_page():
     st.write("""
     The Output data frame that's calculated consists of:
 
-    *   **Precipitation:** The average of all the values of rain for that month.
+    *   **Rain:** The average of all the values of precipitation for that month.
     *   **Tmax:** The maximum temperature of all maximum temperatures for that month.
     *   **Tmin:** The average of all the values of minimum temperatures for that month.
-    *   **Abs_Tmin:** The absolute minimum temperature of all the minimum temperatures for that month.
+    *   **Tmin_abs:** The absolute minimum temperature of all the minimum temperatures for that month.
     """)
     example_output = pd.DataFrame({
          'Month': [1, 2, 12],
          'Rain': [39.1455, 32.8182, 46.6364],
-         'Tmax_max': [13.8, 21.0, 17.8],
-         'Tmin_mean': [-11.9727, -7.5727, -6.9091],
-         'Tmin_min': [-18.6, -13.5, -12.2]
+         'Tmax': [13.8, 21.0, 17.8],
+         'Tmin': [-11.9727, -7.5727, -6.9091],
+         'Tmin_abs': [-18.6, -13.5, -12.2]
     })
     st.dataframe(example_output)
     st.write("Absolute minimum temperature (°C): -18.6")
@@ -245,20 +247,17 @@ def example_page():
     st.header("Example of generated R code")
     st.code("""
 
-    # Install the 'climatol' package if not already installed
-    install.packages('climatol')
+   
+    install.packages('climatol')  # Install the 'climatol' package if not already installed
+ 
+    library(climatol)   # Load the climatol library to access its functions
 
-    # Load the climatol library to access its functions
-    library(climatol)
-
-    # Create monthly values in the same order as the columns in the input data
     rain <- c(39.1, 32.8, 27.3, 30.4, 57.9, 54.6, 56.8, 35.6, 48.6, 41.7, 56.4, 46.6) # Mean total precipitation
-    tmax <- c(13.8, 21.0, 25.1, 30.8, 32.2, 38.9, 40.3, 39.1, 36.5, 27.8, 25.0, 17.8) # Mean maximum daily temperature
-    tmin <- c(-12.0, -7.6, -5.6, -1.3, 3.7, 8.5, 9.3, 9.6, 4.3, -1.3, -3.8, -6.9) # Mean minimum daily temperature
-    tmin_abs <- c(-18.6, -13.5, -15.7, -7.5, 0.0, 7.1, 6.9, 7.2, 0.3, -3.8, -6.0, -12.2) # Absolute minimum daily temperature. This last row is used only to determine the probable frost months (when absolute monthly minimums are equal or lower than 0 C).
+    tmax <- c(13.8, 21.0, 25.1, 30.8, 32.2, 38.9, 40.3, 39.1, 36.5, 27.8, 25.0, 17.8) # Mean maximum monthly temperature
+    tmin <- c(-12.0, -7.6, -5.6, -1.3, 3.7, 8.5, 9.3, 9.6, 4.3, -1.3, -3.8, -6.9) # Mean minimum monthly temperature
+    tmin_abs <- c(-18.6, -13.5, -15.7, -7.5, 0.0, 7.1, 6.9, 7.2, 0.3, -3.8, -6.0, -12.2) # Absolute minimum monthly temperature. This last row is used only to determine the probable frost months (when absolute monthly minimums are equal or lower than 0 C).
 
     # Combine all climate variables into a single matrix for analysis
-    # Each row represents a different variable, each column represents a month
     data.matrix <- rbind(
                    rain,
                    tmax,
@@ -267,12 +266,12 @@ def example_page():
 
     diagwl(                     # diagwl - the function to generate the Walter-Lieth diagram
         data.matrix,            # data.matrix - the climate data to visualize
-        est  = "Pocsaj",        # Name of the climatological station.
-        cols = NULL,            # Columns containing dates and daily data of precipitation and extreme temperatures. Set to NULL if a monthly climate summary is provided.
-        alt  = "97",            # Elevation (altitude) of the climatological station.
-        shem = NULL,            # NULL by default. Set to TRUE or FALSE to force southern or northern hemisphere.
+        est  = "Pocsaj",        # Name of the climatological station
+        cols = NULL,            # Columns containing dates and daily data of precipitation and extreme temperatures. Set to NULL if a monthly climate summary is provided
+        alt  = "97",            # Elevation (altitude) of the climatological station
+        shem = NULL,            # NULL by default. Set to TRUE or FALSE to force southern or northern hemisphere
         p3line = FALSE,         # Draw a supplementary precipitation line referenced to three times the temperature? (FALSE by default.)
-        mlab = "en")            # Vector of 12 monthly labels for the X axis. It may be set to just 'en' or 'es' to use the first letter of month names in English or Spanish respectively.
+        mlab = "en")            # Vector of 12 monthly labels for the X axis. It may be set to just 'en' or 'es' to use the first letter of month names in English or Spanish respectively
 
     # As described by Walter and Lieth, when monthly precipitation is greater than 100 mm, the scale is increased from 2 mm/C to 20 mm/C to avoid too high diagrams in very wet locations. This change is indicated by a black horizontal line, and the graph over it is filled in solid blue.
     # When the precipitation graph lies under the temperature graph (P < 2T) we have an arid period (filled in dotted red vertical lines). Otherwise the period is considered wet (filled in blue lines), unless p3line=TRUE, that draws a precipitation black line with a scale P = 3T; in this case the period in which 3T > P > 2T is considered semi-arid.
