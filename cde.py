@@ -144,7 +144,7 @@ def editor_page():
             rain_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Rain']])
             tmax_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmax']])
             tmin_mean_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
-            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin']])
+            tmin_abs_str = ", ".join([f"{x:.1f}" for x in monthly_avg['Tmin_abs']])
 
             output_buffer = io.StringIO()
             output_buffer.write("install.packages('climatol') # Install the 'climatol' package if not already installed\n\n")
